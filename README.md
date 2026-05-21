@@ -37,5 +37,4 @@ Frontend/Deployment: Streamlit Cloud
 Performance & Explainability
 This model utilizes SHAP (SHapley Additive exPlanations) to ensure transparency. Caregivers and clinicians can see exactly which behavioral markers (e.g., 'Protodeclarative Pointing' or 'Social Smiling') influenced the AI's risk assessment.
 
-Authors
 Developed by Taiye Janet Fagbolade and Iyanu Arowosola
