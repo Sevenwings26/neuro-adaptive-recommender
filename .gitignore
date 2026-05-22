@@ -8,3 +8,8 @@ asd_model.pkl
 
 autism_app.py
 
+.env
+
+
+
+**__pycache__**/

@@ -2,17 +2,17 @@
 
 **Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
-An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations + contextual guidance**.
+An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
 
 ---
 
 ## Project Overview
 
-The Neuro-Adaptive ASD Recommender combines machine learning with semantic matching and generative AI to deliver:
+The Neuro-Adaptive ASD Recommender combines machine learning, semantic matching, and generative AI to deliver:
 
 - Accurate **ASD risk prediction** using the validated **Q-CHAT-10** screening tool.
 - **Personalized app recommendations** based on the child’s specific behavioral profile.
-- **Contextual explanations** for parents using Google Gemini to make recommendations more understandable and actionable.
+- **Contextual AI Chat** powered by Google Gemini for parent-friendly explanations and guidance.
 
 ---
 
@@ -21,73 +21,39 @@ The Neuro-Adaptive ASD Recommender combines machine learning with semantic match
 - Interactive Q-CHAT-10 behavioral screening
 - Real-time ASD risk prediction (XGBoost)
 - Semantic app recommendations (TF-IDF + Cosine Similarity)
-- **Google Gemini-powered contextual guidance** — explains *why* specific apps are recommended for the child’s unique needs
-- Modern, dark-mode-friendly Streamlit interface
-
----
-
-## How It Works
-
-### 1. Diagnostic Engine (XGBoost)
-- Trained on 6,000+ toddler behavioral records
-- Predicts probability of ASD traits
-- Performance: **Accuracy 93.8%** | **Recall 93.0%**
-
-### 2. Recommendation Engine
-- **App Matching**: TF-IDF Vectorization + Cosine Similarity on `app_cache.json`
-- **Parent Context Generation**: Google Gemini Pro is used to generate **human-friendly explanations** that relate the recommended apps to the child’s specific behavioral challenges (e.g., speech delay, sensory issues, social interaction).
-
-> **Example Gemini Output**:  
-> “Because your child shows signs of speech delay and limited eye contact, we recommend ‘Speech Blubs’ — it uses visual prompts and gamification to encourage verbal communication in a low-pressure way…”
-
----
-
-## Major Updates & Contributions
-
-- Upgraded to **Python 3.13**
-- Refactored modeling notebook for better structure and reproducibility
-- Migrated from static book recommendations to dynamic **educational app recommendations**
-- Created `app_cache.json` (curated apps from Google Play)
-- Added `model_card1.json` for model transparency
-- Refactored Streamlit app → `autism_streamlit_app.py`
-- Integrated **Google Gemini** to provide contextual, parent-friendly explanations
+- **Google Gemini-powered contextual chat** — explains recommendations and answers parent questions
+- Modern **FastAPI** backend with RESTful endpoints
+- Responsive **Streamlit** frontend with dark mode support
+- Clean separation of concerns (FastAPI microservice + UI)
 
 ---
 
 ## Tech Stack
 
-- **Language**: Python 3.13
-- **ML**: XGBoost, scikit-learn, pandas, numpy
-- **Vector Search**: TfidfVectorizer + Cosine Similarity
-- **Generative AI**: Google Gemini Pro (for contextual explanations)
-- **Frontend**: Streamlit
-- **Others**: Joblib, Altair, python-dotenv, google-play-scraper
-
-### Major Libraries
-```bash
-xgboost==3.2.0
-scikit-learn==1.8.0
-pandas==3.0.3
-numpy==2.4.6
-streamlit
-google-generativeai
-joblib==1.5.3
-altair==6.1.0
-```
+- **Backend**: FastAPI, Uvicorn
+- **ML**: XGBoost, scikit-learn, pandas, TF-IDF + Cosine Similarity
+- **Generative AI**: Google Gemini
+- **Frontend**: Streamlit (alternative UI)
+- **Others**: Pydantic, Jinja2, Joblib
 
 ---
 
 ## Project Structure
 
 ```bash
-neuro-adpative-recomendation/
-├── autism_streamlit_app.py          # Main Streamlit Application
+neuro-adaptive-recommender/
+├── main.py                    # FastAPI app entry point
+├── core.py                    # Business logic, model loading, helpers
+├── routers.py                 # API endpoints
+├── schemas.py                 # Pydantic models
+├── autism_streamlit_app.py    # Streamlit frontend
 ├── files/
 │   ├── asd_model1.pkl
 │   ├── model_card1.json
-│   └── app_cache.json               # Educational apps database
-├── notebooks/
-│   └── model_training_refactored.ipynb
+│   └── app_cache.json
+├── templates/
+│   ├── index.html
+│   └── results.html
 ├── requirements.txt
 └── README.md
 ```
@@ -96,34 +62,65 @@ neuro-adpative-recomendation/
 
 ## Installation & Setup
 
-1. Clone the repo
-2. Create virtual environment and install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Add your Gemini API key:
-   ```bash
-   # Create .env file
-   GEMINI_API_KEY=your_api_key_here
-   ```
-4. Run the app:
-   ```bash
-   streamlit run autism_streamlit_app.py
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
+cd neuro-adaptive-recommender
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Environment Variables
+Create a `.env` file in the root:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Run the FastAPI Backend
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Open:
+- **Web UI**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+
+### 5. (Optional) Run Streamlit Frontend
+```bash
+streamlit run autism_streamlit_app.py
+```
 
 ---
 
-## Usage
+## API Endpoints
 
-1. Fill in the child’s age, sex, and answer the 10 Q-CHAT questions.
-2. Get instant risk assessment.
-3. For high-risk profiles, receive **ranked app recommendations** + **Gemini-generated explanations** tailored for parents.
-
-> ⚠️ **Important Disclaimer**: This application is a screening and educational support tool. It is **not** a medical diagnostic instrument. Always consult qualified healthcare professionals for diagnosis and intervention.
+| Method | Path          | Description |
+|--------|---------------|-----------|
+| GET    | `/`           | Screening form (Web UI) |
+| POST   | `/screen`     | Submit form → render results |
+| GET    | `/health`     | System health check |
+| GET    | `/apps`       | List all cached apps |
+| POST   | `/predict`    | ASD risk probability only |
+| POST   | `/recommend`  | Risk + ranked app recommendations |
+| POST   | `/chat`       | Contextual chat with Gemini |
 
 ---
 
-## Authors
+## Major Contributions & Updates
+
+- Migrated core logic to **FastAPI** microservice architecture
+- Added **Gemini-powered contextual chat** for personalized parent support
+- Improved dark mode support in Streamlit UI
+- Refactored into clean layered structure (`main`, `core`, `routers`)
+- Better error handling and UTF-8 support for data files
+- Enhanced model transparency with `model_card.json`
+
+---
+
+## Authors & Collaborators
 
 - **Taiye Janet Fagbolade** — Data Scientist & ML Engineer
 - **Iyanu Arowosola** — ML Engineer & Full-Stack Developer
