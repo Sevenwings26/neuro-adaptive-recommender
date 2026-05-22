@@ -1,41 +1,129 @@
-Neuro-Adaptive Learning Recommender (NALR)
+# Neuro-Adaptive ASD Recommender (NALR)
 
-Bridging the Diagnostic Gap: Generative AI for Neurodivergent Early Intervention.
+**Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
-The Neuro-Adaptive Learning Recommender is an AI-powered early intervention platform designed for toddlers (12-36 months). It seamlessly connects clinical behavioral screening with advanced Generative AI to provide personalized therapeutic roadmaps.
+An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations + contextual guidance**.
 
-[ Live Web Application - Click Here to View]((Insert your Streamlit link here))
+---
 
-Project Overview
-Early intervention is the most significant predictor of positive outcomes for neurodivergent children. However, many families in underserved regions face "Specialist Bottlenecks." NALR operates in two high-precision phases:
-Diagnostic Screening: A machine learning engine predicts the probability of Autism Spectrum Disorder (ASD) traits using the validated Q-CHAT-10 behavioral screening framework.
-Generative Intervention (Powered by Google GenAI): For high-risk profiles, the system "injects" specific developmental deficits into the Google Gemini Pro API. The engine generates a tailored therapeutic strategy and recommends globally-rated digital resources (AAC, Speech Therapy, Sensory apps) based on semantic suitability.
+## Project Overview
 
-Objectives
-Democratize Screening: Provide parent-accessible, clinical-grade screening to bridge the gap in specialist-scarce regions.
-Precision Pedagogy: Move beyond generic lists to provide "Reasoning-as-a-Service"—explaining why a specific tool helps a child's unique sensory profile.
-Scalable Support: Utilizing Generative AI to translate complex behavioral data into actionable, easy-to-understand guidance for caregivers.
+The Neuro-Adaptive ASD Recommender combines machine learning with semantic matching and generative AI to deliver:
 
-Technical Architecture
-1. The Diagnostic Engine (XGBoost)
-Dataset: Validated on 6,000+ toddler behavioral samples.
-Algorithm: Extreme Gradient Boosting (XGBoost) Classifier.
-Metrics:
-Accuracy: 93.8%
-Recall (Class 1): 93.0% (Optimized to minimize false negatives in medical screening).
-2. The Generative Recommendation Engine (Google GenAI Injection)
-The Shift: Upgraded from static TF-IDF matching to Google Gemini Pro.
-The Mechanism: The system builds a dynamic prompt based on the child's failed markers (e.g., "Non-verbal, sensory-seeking, avoids eye contact").
-The Output: Gemini acts as a "Virtual Pathologist," analyzing the child's deficit pattern and recommending the best-fitting tools from a curated database of AAC and Speech Therapy resources.
+- Accurate **ASD risk prediction** using the validated **Q-CHAT-10** screening tool.
+- **Personalized app recommendations** based on the child’s specific behavioral profile.
+- **Contextual explanations** for parents using Google Gemini to make recommendations more understandable and actionable.
 
-Tech Stack
-AI/ML: XGBoost, Scikit-Learn
-LLM/GenAI: Google Generative AI (Gemini Pro API)
-Data Engineering: Pandas, NumPy
-Frontend/Deployment: Streamlit Cloud
+---
 
-Performance & Explainability
-This model utilizes SHAP (SHapley Additive exPlanations) to ensure transparency. Caregivers and clinicians can see exactly which behavioral markers (e.g., 'Protodeclarative Pointing' or 'Social Smiling') influenced the AI's risk assessment.
+## Key Features
 
-Authors
-Developed by Taiye Janet Fagbolade and Iyanu Arowosola
+- Interactive Q-CHAT-10 behavioral screening
+- Real-time ASD risk prediction (XGBoost)
+- Semantic app recommendations (TF-IDF + Cosine Similarity)
+- **Google Gemini-powered contextual guidance** — explains *why* specific apps are recommended for the child’s unique needs
+- Modern, dark-mode-friendly Streamlit interface
+
+---
+
+## How It Works
+
+### 1. Diagnostic Engine (XGBoost)
+- Trained on 6,000+ toddler behavioral records
+- Predicts probability of ASD traits
+- Performance: **Accuracy 93.8%** | **Recall 93.0%**
+
+### 2. Recommendation Engine
+- **App Matching**: TF-IDF Vectorization + Cosine Similarity on `app_cache.json`
+- **Parent Context Generation**: Google Gemini Pro is used to generate **human-friendly explanations** that relate the recommended apps to the child’s specific behavioral challenges (e.g., speech delay, sensory issues, social interaction).
+
+> **Example Gemini Output**:  
+> “Because your child shows signs of speech delay and limited eye contact, we recommend ‘Speech Blubs’ — it uses visual prompts and gamification to encourage verbal communication in a low-pressure way…”
+
+---
+
+## Major Updates & Contributions
+
+- Upgraded to **Python 3.13**
+- Refactored modeling notebook for better structure and reproducibility
+- Migrated from static book recommendations to dynamic **educational app recommendations**
+- Created `app_cache.json` (curated apps from Google Play)
+- Added `model_card1.json` for model transparency
+- Refactored Streamlit app → `autism_streamlit_app.py`
+- Integrated **Google Gemini** to provide contextual, parent-friendly explanations
+
+---
+
+## Tech Stack
+
+- **Language**: Python 3.13
+- **ML**: XGBoost, scikit-learn, pandas, numpy
+- **Vector Search**: TfidfVectorizer + Cosine Similarity
+- **Generative AI**: Google Gemini Pro (for contextual explanations)
+- **Frontend**: Streamlit
+- **Others**: Joblib, Altair, python-dotenv, google-play-scraper
+
+### Major Libraries
+```bash
+xgboost==3.2.0
+scikit-learn==1.8.0
+pandas==3.0.3
+numpy==2.4.6
+streamlit
+google-generativeai
+joblib==1.5.3
+altair==6.1.0
+```
+
+---
+
+## Project Structure
+
+```bash
+neuro-adpative-recomendation/
+├── autism_streamlit_app.py          # Main Streamlit Application
+├── files/
+│   ├── asd_model1.pkl
+│   ├── model_card1.json
+│   └── app_cache.json               # Educational apps database
+├── notebooks/
+│   └── model_training_refactored.ipynb
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Installation & Setup
+
+1. Clone the repo
+2. Create virtual environment and install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Add your Gemini API key:
+   ```bash
+   # Create .env file
+   GEMINI_API_KEY=your_api_key_here
+   ```
+4. Run the app:
+   ```bash
+   streamlit run autism_streamlit_app.py
+   ```
+
+---
+
+## Usage
+
+1. Fill in the child’s age, sex, and answer the 10 Q-CHAT questions.
+2. Get instant risk assessment.
+3. For high-risk profiles, receive **ranked app recommendations** + **Gemini-generated explanations** tailored for parents.
+
+> ⚠️ **Important Disclaimer**: This application is a screening and educational support tool. It is **not** a medical diagnostic instrument. Always consult qualified healthcare professionals for diagnosis and intervention.
+
+---
+
+## Authors
+
+- **Taiye Janet Fagbolade** — Data Scientist & ML Engineer
+- **Iyanu Arowosola** — ML Engineer & Full-Stack Developer
