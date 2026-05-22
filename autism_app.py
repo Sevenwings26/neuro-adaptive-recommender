@@ -6,6 +6,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from google import genai
 import time
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 
 # =========================================================
 # 1. PAGE CONFIGURATION & API SETUP
@@ -17,7 +23,7 @@ st.set_page_config(page_title="Neuro-Adaptive Learning Recommender", page_icon="
 # =========================================================
 try:
     # The new SDK uses a Client object instead of genai.configure
-    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 except Exception as e:
     st.error("Google API Key not found. Please configure Streamlit Secrets.")
     st.stop()
@@ -25,19 +31,42 @@ except Exception as e:
 # =========================================================
 # 3. LOAD THE MACHINE LEARNING MODEL
 # =========================================================
+# @st.cache_resource
+# def load_model():
+#     return joblib.load('asd_model.pkl')
+
+# try:
+#     model = load_model()
+# except FileNotFoundError:
+#     st.error("Model file 'asd_model.pkl' not found. Please ensure it is in the same directory.")
+#     st.stop()
+
+
+import joblib
+import streamlit as st
+
+# =========================================================
+# LOAD TRAINED MODEL
+# =========================================================
 @st.cache_resource
 def load_model():
-    return joblib.load('asd_model.pkl')
+    return joblib.load("asd_model.pkl")
 
 try:
     model = load_model()
+
 except FileNotFoundError:
-    st.error("Model file 'asd_model.pkl' not found. Please ensure it is in the same directory.")
+    st.error("Model file 'asd_model.pkl' not found.")
     st.stop()
 
-# =========================================================
+except Exception as e:
+    st.error(f"Failed to load model: {e}")
+    st.stop()
+    
+
+# ========================================
 # 4. APP UI HEADER
-# =========================================================
+# ======================================
 st.title("Neuro-Adaptive Learning Recommender")
 st.write("""
 This tool screens toddlers (12 - 36 Months) for ASD traits, scrapes live educational apps, and uses an AI Agent to deliver a personalized, empathetic intervention plan.
