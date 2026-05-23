@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASD Early Screener — Neuro-Adaptive Recommender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Variables ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f1923;
+      --ink-soft:  #445566;
+      --paper:     #f7f4ee;
+      --cream:     #ede9df;
+      --teal:      #0d7a6e;
+      --teal-lt:   #e0f4f2;
+      --amber:     #d97b00;
+      --amber-lt:  #fff4e0;
+      --danger:    #c0392b;
+      --danger-lt: #fdecea;
+      --border:    #d8d2c5;
+      --shadow:    0 2px 16px rgba(15,25,35,0.08);
+      --radius:    12px;
+      --mono:      'DM Mono', monospace;
+      --serif:     'Fraunces', Georgia, serif;
+      --sans:      'Outfit', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────── */
+    .shell {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────── */
+    .sidebar {
+      background: var(--ink);
+      color: #fff;
+      padding: 2.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #fff;
+    }
+    .sidebar-logo span { color: #5ecfc5; }
+
+    .sidebar-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .meta-chip {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 0.35rem 0.65rem;
+      color: #a0b4c0;
+    }
+    .meta-chip strong { color: #5ecfc5; }
+
+    .sidebar-desc {
+      font-size: 0.85rem;
+      color: #8fa4b0;
+      line-height: 1.7;
+    }
+
+    .disclaimer {
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: #607080;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1.25rem;
+      line-height: 1.6;
+    }
+
+    /* ── Main Panel ──────────────────────────────────────────────── */
+    .main {
+      padding: 3rem 3.5rem;
+      max-width: 760px;
+    }
+
+    .page-heading {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .page-heading em { color: var(--teal); font-style: italic; }
+
+    .page-sub {
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Form card ───────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2.25rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Demographics row ────────────────────────────────────────── */
+    .demo-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+    .field select,
+    .field input[type="range"] {
+      width: 100%;
+    }
+    .field select {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--paper);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--ink);
+      appearance: none;
+      cursor: pointer;
+    }
+    .field select:focus { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+    .range-row { display: flex; align-items: center; gap: 0.75rem; }
+    .range-val {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--teal);
+      min-width: 42px;
+      text-align: right;
+    }
+    input[type="range"] {
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+
+    /* ── Q-CHAT questions ────────────────────────────────────────── */
+    .q-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .q-row {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--cream);
+      animation: fadeUp 0.3s ease both;
+    }
+    .q-row:last-child { border-bottom: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .q-num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--teal);
+      font-weight: 500;
+      text-align: center;
+      background: var(--teal-lt);
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .q-text {
+      font-size: 0.88rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .q-text small {
+      display: block;
+      color: var(--ink-soft);
+      font-size: 0.77rem;
+      margin-top: 0.15rem;
+    }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .toggle-label-off,
+    .toggle-label-on {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .toggle-label-off { color: var(--teal); }
+    .toggle-label-on  { color: var(--ink-soft); }
+
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--teal);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .slider { background: var(--border); }
+    .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+    /* Invert — for A9/A10: checked = atypical = 1 */
+    .toggle.invert input:checked + .slider { background: var(--amber); }
+    .toggle.invert .toggle-label-off { color: var(--ink-soft); }
+    .toggle.invert .toggle-label-on  { color: var(--amber); }
+
+    /* Hidden inputs that carry the 0/1 values */
+    input[type="hidden"] {}
+
+    /* ── Top-N selector ──────────────────────────────────────────── */
+    .topn-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 0.5rem;
+    }
+    .topn-row label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .topn-btns { display: flex; gap: 0.4rem; }
+    .topn-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--paper);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--ink);
+      transition: all 0.15s;
+    }
+    .topn-btn.active,
+    .topn-btn:hover {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    /* ── Submit button ────────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover  { background: #0a6359; }
+    .btn-submit:active { transform: scale(0.99); }
+
+    /* ── Progress dots ───────────────────────────────────────────── */
+    .progress-bar {
+      height: 3px;
+      background: var(--cream);
+      border-radius: 3px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--teal);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .main { padding: 2rem 1.25rem; }
+      .demo-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Neuro<span>Adapt</span><br/>Recommender</div>
+
+    <div class="sidebar-meta">
+      <div class="meta-chip">Model &nbsp;<strong>{{ model_card.get('model_type', 'XGBoost') }}</strong></div>
+      <div class="meta-chip">Accuracy &nbsp;<strong>{{ "%.1f"|format(model_card.get('test_accuracy', 0) * 100) }}%</strong></div>
+      <div class="meta-chip">ROC-AUC &nbsp;<strong>{{ "%.3f"|format(model_card.get('test_roc_auc', 0)) }}</strong></div>
+      <div class="meta-chip">Apps in cache &nbsp;<strong>{{ apps_count }}</strong></div>
+    </div>
+
+    <p class="sidebar-desc">
+      Early screening for Autism Spectrum Disorder (ASD) traits in toddlers
+      aged 12–36 months, using the validated Q-CHAT-10 instrument.
+      Matched to educational resources via NLP.
+    </p>
+
+    <div class="disclaimer">
+      ⚠️ This tool is a <strong>screening aid only</strong>. It does not
+      constitute a medical diagnosis. Always consult a licensed developmental
+      paediatrician for clinical assessment.
+    </div>
+  </aside>
+
+  <!-- ── Main Panel ──────────────────────────────────────────────── -->
+  <main class="main">
+    <h1 class="page-heading">Toddler ASD <em>Screening</em></h1>
+    <p class="page-sub">
+      Complete all 12 fields below. The form takes about 2 minutes.
+      Responses are analysed instantly by our trained XGBoost classifier.
+    </p>
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <form method="POST" action="/screen" id="screenForm">
+
+      <!-- Demographics -->
+      <div class="card">
+        <div class="card-title">👶 Child Demographics</div>
+        <div class="demo-row">
+          <div class="field">
+            <label>Age (Months)</label>
+            <div class="range-row">
+              <input type="range" name="age" id="ageRange" min="12" max="36" value="24"
+                     oninput="document.getElementById('ageVal').textContent = this.value + ' mo'" />
+              <span class="range-val" id="ageVal">24 mo</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Biological Sex</label>
+            <select name="sex">
+              <option value="1">Male</option>
+              <option value="0">Female</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q-CHAT-10 -->
+      <div class="card">
+        <div class="card-title">🧠 Q-CHAT-10 Behavioral Milestones</div>
+        <p style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:1.25rem;">
+          Toggle <strong>ON</strong> (left / teal) = milestone met (typical). 
+          Toggle <strong>OFF</strong> (right / grey) = milestone not observed (delayed).
+          Questions 9 &amp; 10 are reversed — toggle ON means the behaviour <em>is</em> present.
+        </p>
+
+        <div class="q-grid" id="qGrid">
+          <!-- Questions 1-8: ON=typical=0, OFF=delayed=1 -->
+          {% set q_standard = [
+            ("A1",  "Responds to name when called",        "Looks toward you when you say their name"),
+            ("A2",  "Makes eye contact",                   "Holds eye contact naturally during interaction"),
+            ("A3",  "Points to indicate wants",            "Uses index finger to point at desired objects"),
+            ("A4",  "Points to share interest",            "Points at things just to show you, not to get them"),
+            ("A5",  "Engages in pretend play",             "Uses toys imaginatively (e.g. feeding a doll)"),
+            ("A6",  "Follows gaze / pointing",             "Looks where you look or point"),
+            ("A7",  "Uses basic words or speech",          "Says at least a few recognisable words"),
+            ("A8",  "Understands simple gestures",         "Responds to waving, pointing, or shaking head")
+          ] %}
+
+          {% for code, title, hint in q_standard %}
+          <div class="q-row" style="animation-delay: {{ loop.index * 0.04 }}s">
+            <div class="q-num">{{ loop.index }}</div>
+            <div class="q-text">
+              {{ title }}
+              <small>{{ hint }}</small>
+            </div>
+            <div class="toggle-wrap">
+              <span class="toggle-label-off">Yes</span>
+              <label class="toggle" title="{{ title }}">
+                <input type="checkbox" class="q-toggle" data-field="{{ code }}" checked
+                       onchange="syncToggle(this)" />
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-label-on">No</span>
+              <input type="hidden" name="{{ code }}" id="val_{{ code }}" value="0" />
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- Questions 9-10: ON=atypical=1, OFF=typical=0 (inverted) -->
+          {% set q_inverted = [
+            ("A9",  "Unusual sensory reactions",           "Over- or under-reacts to sounds, textures, lights"),
+            ("A10", "Repetitive or unusual behaviours",    "Hand-flapping, rocking, lining up objects, meltdowns")
+          ] %}
+
+          {% for code, title, hint in q_inverted %}
+          <div class="q-row" style="animation-delay: {{ (loop.index + 8) * 0.04 }}s">
+            <div class="q-num">{{ loop.index + 8 }}</div>
+            <div class="q-text">
+              {{ title }}
+              <small>{{ hint }}</small>
+            </div>
+            <div class="toggle-wrap">
+              <span class="toggle-label-off" style="color:var(--ink-soft)">No</span>
+              <label class="toggle invert" title="{{ title }}">
+                <input type="checkbox" class="q-toggle-inv" data-field="{{ code }}"
+                       onchange="syncToggleInv(this)" />
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-label-on" style="color:var(--amber)">Yes</span>
+              <input type="hidden" name="{{ code }}" id="val_{{ code }}" value="0" />
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Top-N -->
+      <div class="card">
+        <div class="card-title">📱 Recommendation Count</div>
+        <div class="topn-row">
+          <label>Show me</label>
+          <div class="topn-btns" id="topnBtns">
+            <button type="button" class="topn-btn" onclick="setTopN(1)">1</button>
+            <button type="button" class="topn-btn active" onclick="setTopN(3)">3</button>
+            <button type="button" class="topn-btn" onclick="setTopN(5)">5</button>
+          </div>
+          <label>top apps</label>
+          <input type="hidden" name="top_n" id="topNVal" value="3" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        Analyse Profile &amp; Generate Recommendations →
+      </button>
+
+    </form>
+  </main>
+</div>
+
+<script>
+  // ── Toggle sync (standard: checked=typical=0, unchecked=delayed=1) ──
+  function syncToggle(el) {
+    document.getElementById('val_' + el.dataset.field).value = el.checked ? 0 : 1;
+    updateProgress();
+  }
+
+  // ── Toggle sync (inverted: checked=atypical=1, unchecked=typical=0) ──
+  function syncToggleInv(el) {
+    document.getElementById('val_' + el.dataset.field).value = el.checked ? 1 : 0;
+    updateProgress();
+  }
+
+  // ── Top-N picker ──────────────────────────────────────────────────
+  function setTopN(n) {
+    document.getElementById('topNVal').value = n;
+    document.querySelectorAll('.topn-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.textContent) === n);
+    });
+  }
+
+  // ── Progress bar (counts how many toggles have been touched) ──────
+  let touched = new Set();
+  document.querySelectorAll('.q-toggle, .q-toggle-inv').forEach(el => {
+    el.addEventListener('change', () => {
+      touched.add(el.dataset.field);
+      updateProgress();
+    });
+  });
+  function updateProgress() {
+    const pct = Math.round((touched.size / 10) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  // ── Animate rows on load ──────────────────────────────────────────
+  document.querySelectorAll('.q-row').forEach((row, i) => {
+    row.style.animationDelay = (i * 0.04) + 's';
+  });
+</script>
+
+</body>
+</html>
