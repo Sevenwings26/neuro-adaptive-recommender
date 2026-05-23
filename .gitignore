@@ -10,9 +10,9 @@
 
 
 
-notebook/
-streamlit_app/
-visualizations/
+# notebook/
+# streamlit_app/
+# visualizations/
 # fastapi_app/files/
 .env
 __pycache__/
