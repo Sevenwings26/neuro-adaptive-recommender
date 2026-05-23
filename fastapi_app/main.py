@@ -12,7 +12,8 @@ from dotenv import load_dotenv
 import sys
 
 from core import (
-    state, _load_model, _load_app_cache, _init_gemini, _download_if_missing, 
+    state, _load_model, _load_app_cache, _init_gemini, 
+    # _download_if_missing, 
     predict_risk, recommend_apps, build_profile_text, explain_profile, QUESTION_LABELS, log
 )
 from routers import api_router
@@ -30,8 +31,8 @@ async def lifespan(app: FastAPI):
         _load_model()
         log.info("✓ Model loaded")
         
-        _download_if_missing() 
-        log.info("✓ files downloaded loaded")
+        # _download_if_missing() 
+        # log.info("✓ files downloaded loaded")
 
         _load_app_cache()
         log.info("✓ App cache loaded")
@@ -41,8 +42,8 @@ async def lifespan(app: FastAPI):
         
         # Verify API key is loaded
         load_dotenv()
-        api_key = os.getenv("GEMINI_API_KEY")
-        log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
+        # api_key = os.getenv("GEMINI_API_KEY")
+        # log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
         
     except Exception as e:
         log.error(f"Startup error: {e}")
