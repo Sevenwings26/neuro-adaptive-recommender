@@ -37,14 +37,47 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+
 # ─────────────────────────────────────────────────────────────────────────────
 # PATHS
 # ─────────────────────────────────────────────────────────────────────────────
-BASE_DIR = Path(__file__).parent
-MODEL_PATH = BASE_DIR / "files/asd_model1.pkl"
+BASE_DIR        = Path(__file__).parent
+MODEL_PATH      = BASE_DIR / "files/asd_model1.pkl"
 MODEL_CARD_PATH = BASE_DIR / "files/model_card1.json"
-APP_CACHE_PATH = BASE_DIR / "files/app_cache.json"
-TEMPLATES_DIR = BASE_DIR / "templates"
+APP_CACHE_PATH  = BASE_DIR / "files/app_cache.json"
+TEMPLATES_DIR   = BASE_DIR / "templates"
+
+# ──────────────────────────
+# ARTIFACT DOWNLOAD  (runs at startup on Vercel — skipped if files exist)
+# ────────────────────────────────────
+import urllib.request
+
+def _download_if_missing() -> None:
+    """
+    Download model artifacts from Google Drive if not present locally.
+    URLs are read from environment variables — set them in Vercel dashboard.
+    """
+    files = {
+        MODEL_PATH      : os.getenv("MODEL_PATH"),
+        MODEL_CARD_PATH : os.getenv("MODEL_CARD_URL"),
+        APP_CACHE_PATH  : os.getenv("APP_CACHE_URL"),
+    }
+
+    for path, url in files.items():
+        if path.exists():
+            log.info("%s already present — skipping.", path.name)
+            continue
+        if not url:
+            log.warning("No URL configured for %s — must be present locally.", path.name)
+            continue
+        log.info("Downloading %s ...", path.name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            urllib.request.urlretrieve(url, path)
+            log.info("✅ Downloaded %s", path.name)
+        except Exception as e:
+            log.error("❌ Failed to download %s: %s", path.name, e)
+            raise
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONSTANTS

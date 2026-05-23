@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import sys
 
 from core import (
-    state, _load_model, _load_app_cache, _init_gemini,
+    state, _load_model, _load_app_cache, _init_gemini, _download_if_missing, 
     predict_risk, recommend_apps, build_profile_text, explain_profile, QUESTION_LABELS, log
 )
 from routers import api_router
@@ -30,6 +30,9 @@ async def lifespan(app: FastAPI):
         _load_model()
         log.info("✓ Model loaded")
         
+        _download_if_missing() 
+        log.info("✓ files downloaded loaded")
+
         _load_app_cache()
         log.info("✓ App cache loaded")
         
@@ -90,30 +93,6 @@ def index(request: Request):
         },
     )
 
-
-# @app.get("/apps", response_class=HTMLResponse, tags=["UI"])
-# def apps_page(request: Request):
-#     """Render the full app catalogue page."""
-#     apps = []
-#     if not state.df_apps.empty:
-#         apps = [
-#             {
-#                 "app_name"   : row["App_Name"],
-#                 "category"   : row.get("Category", ""),
-#                 "rating"     : float(row.get("Rating", 0)),
-#                 "price"      : row.get("Price", ""),
-#                 "description": str(row.get("Description", ""))[:200],
-#             }
-#             for _, row in state.df_apps.iterrows()
-#         ]
-#     return templates.TemplateResponse(
-#         request,
-#         "all_apps.html",
-#         context={
-#             "apps"          : apps,
-#             "chat_available": state.gemini_client is not None,
-#         },
-#     )
 @app.get("/apps-page", response_class=HTMLResponse, tags=["UI"])
 def apps_page(request: Request):
     """Render the apps catalogue page."""
