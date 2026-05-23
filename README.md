@@ -1,40 +1,128 @@
-Neuro-Adaptive Learning Recommender (NALR)
+# Neuro-Adaptive ASD Recommender (NALR)
 
-Bridging the Diagnostic Gap: Generative AI for Neurodivergent Early Intervention.
+**Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
-The Neuro-Adaptive Learning Recommender is an AI-powered early intervention platform designed for toddlers (12-36 months). It seamlessly connects clinical behavioral screening with advanced Generative AI to provide personalized therapeutic roadmaps.
+An intelligent screening and recommendation system that helps parents and caregivers identify Autism Spectrum Disorder (ASD) traits in toddlers (12–36 months) and receive **personalized educational app recommendations** with **contextual AI guidance**.
 
-[ Live Web Application - Click Here to View]((Insert your Streamlit link here))
+---
 
-Project Overview
-Early intervention is the most significant predictor of positive outcomes for neurodivergent children. However, many families in underserved regions face "Specialist Bottlenecks." NALR operates in two high-precision phases:
-Diagnostic Screening: A machine learning engine predicts the probability of Autism Spectrum Disorder (ASD) traits using the validated Q-CHAT-10 behavioral screening framework.
-Generative Intervention (Powered by Google GenAI): For high-risk profiles, the system "injects" specific developmental deficits into the Google Gemini Pro API. The engine generates a tailored therapeutic strategy and recommends globally-rated digital resources (AAC, Speech Therapy, Sensory apps) based on semantic suitability.
+## Project Overview
 
-Objectives
-Democratize Screening: Provide parent-accessible, clinical-grade screening to bridge the gap in specialist-scarce regions.
-Precision Pedagogy: Move beyond generic lists to provide "Reasoning-as-a-Service"—explaining why a specific tool helps a child's unique sensory profile.
-Scalable Support: Utilizing Generative AI to translate complex behavioral data into actionable, easy-to-understand guidance for caregivers.
+The Neuro-Adaptive ASD Recommender combines machine learning, semantic matching, and generative AI to deliver:
 
-Technical Architecture
-1. The Diagnostic Engine (XGBoost)
-Dataset: Validated on 6,000+ toddler behavioral samples.
-Algorithm: Extreme Gradient Boosting (XGBoost) Classifier.
-Metrics:
-Accuracy: 93.8%
-Recall (Class 1): 93.0% (Optimized to minimize false negatives in medical screening).
-2. The Generative Recommendation Engine (Google GenAI Injection)
-The Shift: Upgraded from static TF-IDF matching to Google Gemini Pro.
-The Mechanism: The system builds a dynamic prompt based on the child's failed markers (e.g., "Non-verbal, sensory-seeking, avoids eye contact").
-The Output: Gemini acts as a "Virtual Pathologist," analyzing the child's deficit pattern and recommending the best-fitting tools from a curated database of AAC and Speech Therapy resources.
+- Accurate **ASD risk prediction** using the validated **Q-CHAT-10** screening tool.
+- **Personalized app recommendations** based on the child’s specific behavioral profile.
+- **Contextual AI Chat** powered by Google Gemini for parent-friendly explanations and guidance.
 
-Tech Stack
-AI/ML: XGBoost, Scikit-Learn
-LLM/GenAI: Google Generative AI (Gemini Pro API)
-Data Engineering: Pandas, NumPy
-Frontend/Deployment: Streamlit Cloud
+---
 
-Performance & Explainability
-This model utilizes SHAP (SHapley Additive exPlanations) to ensure transparency. Caregivers and clinicians can see exactly which behavioral markers (e.g., 'Protodeclarative Pointing' or 'Social Smiling') influenced the AI's risk assessment.
+## Key Features
 
-Developed by Taiye Janet Fagbolade and Iyanu Arowosola
+- Interactive Q-CHAT-10 behavioral screening
+- Real-time ASD risk prediction (XGBoost)
+- Semantic app recommendations (TF-IDF + Cosine Similarity)
+- **Google Gemini-powered contextual chat** — explains recommendations and answers parent questions
+- Modern **FastAPI** backend with RESTful endpoints
+- Responsive **Streamlit** frontend with dark mode support
+- Clean separation of concerns (FastAPI microservice + UI)
+
+---
+
+## Tech Stack
+
+- **Backend**: FastAPI, Uvicorn
+- **ML**: XGBoost, scikit-learn, pandas, TF-IDF + Cosine Similarity
+- **Generative AI**: Google Gemini
+- **Frontend**: Streamlit (alternative UI)
+- **Others**: Pydantic, Jinja2, Joblib
+
+---
+
+## Project Structure
+
+```bash
+neuro-adaptive-recommender/
+├── fastapi_app/                  # Main FastAPI backend (recommended for production/hackathon submission)
+│   ├── files/                    # Contains data files
+│   ├── templates/                # Jinja2 HTML templates (index.html, results.html, etc.)
+│   ├── core.py                   # Core logic: model loading, helpers, TF-IDF, Gemini functions
+│   ├── main.py                   # FastAPI app entry point + lifespan + root routes
+│   ├── schemas.py                # Pydantic models (requests & responses)
+│   └── routers.py                # All API endpoints (health, predict, recommend, result, chat)
+│
+├── requirements.txt              # Dependencies for FastAPI backend
+├── notebook/                    # Jupyter notebooks for model training & EDA
+├── streamlit_app/                # Alternative frontend (Streamlit version)
+│   ├── autism_app.py
+│   └── autism_streamlit_app.py   # Improved version with better dark mode & UX
+├── visualizations/               # Charts, screenshots, and model evaluation images
+├── .gitignore
+└── README.md                     # Project documentation (should be updated)
+```
+
+---
+
+## Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
+cd neuro-adaptive-recommender
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Environment Variables
+Create a `.env` file in the root:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Run the FastAPI Backend
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Open:
+- **Web UI**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+
+### 5. (Optional) Run Streamlit Frontend
+```bash
+streamlit run autism_streamlit_app.py
+```
+
+---
+
+## API Endpoints
+
+| Method | Path          | Description |
+|--------|---------------|-----------|
+| GET    | `/`           | Screening form (Web UI) |
+| POST   | `/screen`     | Submit form → render results |
+| GET    | `/health`     | System health check |
+| GET    | `/apps`       | List all cached apps |
+| POST   | `/predict`    | ASD risk probability only |
+| POST   | `/recommend`  | Risk + ranked app recommendations |
+| POST   | `/chat`       | Contextual chat with Gemini |
+
+---
+
+## Major Contributions & Updates
+
+- Migrated core logic to **FastAPI** microservice architecture
+- Added **Gemini-powered contextual chat** for personalized parent support
+- Improved dark mode support in Streamlit UI
+- Refactored into clean layered structure (`main`, `core`, `routers`)
+- Better error handling and UTF-8 support for data files
+- Enhanced model transparency with `model_card.json`
+
+---
+
+## Authors & Collaborators
+
+- **Taiye Janet Fagbolade** — Data Scientist & ML Engineer
+- **Iyanu Arowosola** — ML Engineer & Full-Stack Developer
