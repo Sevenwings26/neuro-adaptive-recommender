@@ -1,7 +1,11 @@
+
+
 notebook/
 streamlit_app/
 visualizations/
+fastapi_app/files/
 .env
 __pycache__/
 *.pyc
+*.ipynb
 .venv/
