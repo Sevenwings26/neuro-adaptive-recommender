@@ -1,0 +1,106 @@
+
+
+<aside class="chat-drawer" id="chatDrawer" role="complementary" aria-label="Ask Nora AI">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <span class="chat-header-title">Nora AI</span>
+      <span class="chat-header-sub">
+        {% if is_results_page %}
+          Personalised to your child's screening results
+        {% else %}
+          General autism &amp; early intervention guide
+        {% endif %}
+      </span>
+    </div>
+    <button class="btn-close-chat" onclick="toggleChat()" aria-label="Close chat">✕</button>
+  </div>
+
+  <!-- Context pill — only shown on results page -->
+  {% if is_results_page %}
+  <div class="chat-context">
+    Context: {{ age }}mo {{ sex_label }} · {{ risk_probability }}% risk ·
+    {{ total_flags }}/10 flags · {{ recommendations|length }} apps
+  </div>
+  {% else %}
+  <div class="chat-context" style="background:var(--teal-lt);color:var(--teal);">
+    ℹ️ No screening loaded — Nora will answer general questions about autism &amp; early development.
+    <a href="/" style="color:var(--teal);font-weight:600;margin-left:0.3rem;">Run a screening →</a>
+  </div>
+  {% endif %}
+
+  <!-- Messages -->
+  <div class="chat-messages" id="chatMessages">
+    <div class="msg ai">
+      <div class="msg-bubble">
+        {% if is_results_page %}
+          Hi! I'm Nora. I've loaded your child's screening results — every answer
+          I give will be tailored to your situation. What would you like to understand better?
+        {% else %}
+          Hi! I'm Nora, your early intervention guide. I can answer questions about
+          autism, developmental milestones, therapy options, and more.
+          You can also <a href="/" style="color:var(--teal);">run a free screening</a> to get
+          personalised recommendations for your child.
+        {% endif %}
+      </div>
+      <span class="msg-time">now</span>
+    </div>
+  </div>
+
+  <!-- Suggested questions -->
+  <div class="chat-suggestions" id="chatSuggestions">
+    <p>Suggested questions</p>
+
+    {% if is_results_page %}
+      {% if recommendations %}
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('How does {{ recommendations[0].app_name }} help with my child\'s specific delays?')">
+        How does {{ recommendations[0].app_name }} help with my child's delays?
+      </button>
+      {% endif %}
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('What does the {{ risk_probability }}% risk score mean day-to-day?')">
+        What does a {{ risk_probability }}% risk score mean day-to-day?
+      </button>
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('What early intervention steps should we take first?')">
+        What early intervention steps should we take first?
+      </button>
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('How do I explain this screening result to family members?')">
+        How do I explain this to family members?
+      </button>
+    {% else %}
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('What are the early signs of autism in toddlers under 3?')">
+        Early signs of autism in toddlers under 3?
+      </button>
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('At what age should I be concerned about speech delay?')">
+        At what age should I be concerned about speech delay?
+      </button>
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('What is the Q-CHAT-10 screening tool and how does it work?')">
+        What is the Q-CHAT-10 and how does it work?
+      </button>
+      <button class="suggestion-btn"
+        onclick="sendSuggestion('What therapy options exist for toddlers showing ASD traits?')">
+        What therapy options exist for toddlers with ASD traits?
+      </button>
+    {% endif %}
+  </div>
+
+
+  <div class="chat-input-row">
+    <textarea
+      class="chat-input" id="chatInput" rows="1"
+      placeholder="Ask about autism, milestones, or early intervention…"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="btn-send" id="sendBtn" onclick="sendMessage()" aria-label="Send">➤</button>
+  </div>
+
+
+</aside>
