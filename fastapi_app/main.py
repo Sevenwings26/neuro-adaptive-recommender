@@ -162,6 +162,11 @@ async def screen(
         profile_text = build_profile_text(scores) if high_risk else ""
         app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
 
+        flagged_details = [
+            {"code": k, "label": QUESTION_LABELS[k]}
+            for k in QUESTION_LABELS if scores.get(k, 0) == 1
+        ]
+
         profile_explained = ""
         if state.gemini_client:
             try:
@@ -191,10 +196,6 @@ async def screen(
         #         log.error(f"explain_profile crashed: {e}")
         #         profile_explained = "We recommend focusing on communication and social engagement activities."
                 
-        flagged_details = [
-            {"code": k, "label": QUESTION_LABELS[k]}
-            for k in QUESTION_LABELS if scores.get(k, 0) == 1
-        ]
 
         screening_context = {
             "age": age,
