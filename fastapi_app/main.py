@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
     startup_success = True
 
     try:
-        # Load environment variables (best done early)
+        # Load .env only if it exists (for local development)
         load_dotenv(override=True)
 
         _load_model()
@@ -76,24 +76,25 @@ async def lifespan(app: FastAPI):
         log.info(f"✓ App cache loaded — {len(state.df_apps)} apps")
 
         _init_gemini()
-        log.info(f"✓ Gemini initialized: {state.gemini_client is not None}")
-
+        
+        # Better API Key logging (without exposing the key)
         api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
+        if api_key:
+            # masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+            # log.info(f"✓ GEMINI_API_KEY loaded successfully ({masked_key})")
+            log.info(f"✓ GEMINI_API_KEY loaded successfully")
+        else:
             log.warning("⚠️ GEMINI_API_KEY is missing — Chat feature will be disabled")
 
     except Exception as e:
         log.error(f"❌ Critical startup error: {e}")
         startup_success = False
-        # In production, you may choose to raise here for fail-fast behavior
-        # raise  # Uncomment in strict production mode
 
     log.info(f"Startup completed in {time.time() - state.startup_time:.2f}s")
     log.info(f"Chat available: {state.gemini_client is not None}")
     log.info(f"Overall startup success: {startup_success}")
 
     yield
-
     log.info("Shutting down.")
 
 
