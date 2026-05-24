@@ -50,7 +50,7 @@ TEMPLATES_DIR   = BASE_DIR / "templates"
 # ──────────────────────────
 # ARTIFACT DOWNLOAD  (runs at startup on Vercel — skipped if files exist)
 # ────────────────────────────────────
-import urllib.request
+# import urllib.request
 
 # def _download_if_missing() -> None:
 #     """
@@ -195,43 +195,67 @@ def build_profile_text(scores: dict[str, int]) -> str:
     return " ".join(needs) if needs else "autism special education cognitive skills"
 
 
+
 async def explain_profile(
-    profile_text: str,
     age: int,
     sex_label: str,
+    risk_probability: float,
+    total_flags: int,
+    flagged_details: list,
+    profile_text: str,
     gemini_client,
 ) -> str:
     """
-    Uses Gemini to convert raw TF-IDF profile into warm, parent-friendly explanation.
+    Uses Gemini to generate a warm, parent-friendly summary of the screening
+    result — for both high and low risk outcomes.
     """
-    if not gemini_client or not profile_text.strip():
-        return "This profile suggests support may be needed in areas like communication, social interaction, or sensory processing."
+    if not gemini_client:
+        return ""
 
-    prompt = f"""
-        A {age}-month-old {sex_label} toddler has the following developmental needs: 
-        "{profile_text}".
+    flagged_labels = ", ".join(
+        f"{d['code']} ({d['label']})" for d in flagged_details
+    ) or "none"
 
-        Please explain this to a concerned parent in 2–3 warm, simple, and encouraging sentences.
-        Focus on what the child might be finding challenging in daily life.
-        Use plain English. Be compassionate. Do not use medical jargon or labels like "autism".
-    """.strip()
+    if risk_probability >= 50:
+        prompt = f"""
+            A {age}-month-old {sex_label} toddler was screened using the Q-CHAT-10 developmental 
+            checklist. The result shows a {risk_probability:.1f}% likelihood of ASD traits, 
+            with {total_flags} out of 10 milestones flagged: {flagged_labels}.
+            Their developmental needs profile is: "{profile_text}".
+
+            Write 2–3 warm, encouraging sentences for the parent explaining what this result 
+            means in plain everyday language. Focus on what the child may be finding 
+            challenging right now and why early support matters.
+            Do not use clinical labels or the word "autism". Be compassionate and hopeful.
+        """.strip()
+    else:
+        prompt = f"""
+            A {age}-month-old {sex_label} toddler was screened using the Q-CHAT-10 developmental 
+            checklist. The result shows a {risk_probability:.1f}% likelihood of ASD traits — 
+            a low-risk result — with {total_flags} out of 10 milestones flagged: {flagged_labels or "none"}.
+
+            Write 2–3 warm, reassuring sentences for the parent explaining what this result 
+            means in plain everyday language. Acknowledge any milestones that were flagged 
+            if any exist, but frame the overall result positively. 
+            Recommend routine monitoring and continued engagement.
+            Do not use clinical labels. Be warm and encouraging.
+        """.strip()
 
     try:
         response = gemini_client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[{"role": "user", "parts": [{"text": prompt}]}],
         )
-        explanation = response.text.strip()
-        return explanation if explanation else profile_text
-
+        return response.text.strip() or ""
     except Exception as e:
-        log.warning(f"Gemini explain_profile failed: {e}")
+        log.warning(f"Profile Explanation failed: {e}")
         # Safe fallback
         return (
             f"Your child may benefit from extra support in areas such as "
             f"communication, eye contact, or sensory regulation. "
             f"Early help can make a big difference."
         )
+
 
 def predict_risk(scores: dict[str, int]) -> float:
     input_df = pd.DataFrame([{col: scores[col] for col in state.feature_cols}])
@@ -259,41 +283,5 @@ def recommend_apps(profile_text: str, top_n: int) -> list[RecommendedApp]:
         )
         for i, row in top.iterrows()
     ]
-
-
-
-    
-# async def explain_profile(
-#     profile_text: str,
-#     age: int,
-#     sex_label: str,
-#     gemini_client,
-# ) -> str:
-#     """
-#     Ask Gemini to translate the raw TF-IDF profile_text into a
-#     plain-English summary of the child's developmental needs.
-#     Returns a fallback string if Gemini is unavailable.
-#     """
-#     if not gemini_client or not profile_text:
-#         return profile_text   # graceful fallback — show raw text
-
-#     prompt = f"""
-#         A {age}-month-old {sex_label} toddler has been screened using the Q-CHAT-10 tool.
-#         Their developmental needs profile was identified as: "{profile_text}".
-
-#         In 2–3 warm, plain-English sentences, explain to the parent what this means
-#         for their child's day-to-day development. Focus on what the child may be
-#         finding difficult, not on labels or diagnoses. No bullet points. No medical jargon.
-#     """
-    
-#     try:
-#         response = gemini_client.models.generate_content(
-#             model    = GEMINI_MODEL,
-#             contents = [{"role": "user", "parts": [{"text": prompt}]}],
-#         )
-#         return response.text.strip()
-#     except Exception as e:
-#         log.warning("Profile explanation failed: %s", e)
-#         return profile_text   # fallback to raw text on any error
 
 

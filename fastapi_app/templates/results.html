@@ -407,7 +407,7 @@
       <span class="dot"></span> Ask Nora AI
     </button>
     <a href="/" class="topbar-back">← New Screening</a>
-
+    <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
   </div>
 </nav>
 
@@ -464,16 +464,17 @@
     {% endif %}
   </div>
 
+{# Gemini explanation — shown for ALL results #}
+  {% if profile_explained %}
+  <div class="profile-box">
+    <strong>About Your Child's Screening Result</strong>
+    {{ profile_explained }}
+  </div>
+  {% endif %}
+
   {% if high_risk %}
+    {# Raw profile_text hidden from UI — still passed to chat context #}
 
-    <!-- Profile text -->
-
-    {% if profile_explained %}
-    <div class="profile-box">
-      <strong>About Your Child's Developmental Needs</strong>
-      {{ profile_explained }}
-    </div>
-    {% endif %}
     <!-- ── App Recommendations ────────────────────────────── -->
     <div class="sec-head">📱 Recommended Apps</div>
     <div class="rec-list">
@@ -502,7 +503,6 @@
     </div>
 
   {% endif %}
-
   <!-- Model card footer -->
   <div class="model-footer">
     <div class="mf-chip">Model <strong>{{ model_card.get('model_type','XGBoost') }}</strong></div>

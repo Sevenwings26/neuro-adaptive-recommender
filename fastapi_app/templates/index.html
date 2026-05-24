@@ -353,6 +353,45 @@
       transition: width 0.3s ease;
     }
 
+    /* ── Radio buttons ────────────────────────────────────────── */
+.radio-wrap {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.radio-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  background: var(--paper);
+  color: var(--ink-soft);
+  user-select: none;
+}
+
+.radio-opt input[type="radio"] {
+  display: none; /* hide the raw radio, style the label */
+}
+
+.radio-opt.yes-opt:has(input:checked) {
+  background: var(--teal-lt);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.radio-opt.no-opt:has(input:checked) {
+  background: var(--danger-lt, #fdecea);
+  border-color: var(--danger, #c0392b);
+  color: var(--danger, #c0392b);
+}
+
     /* ── Responsive ──────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .shell { grid-template-columns: 1fr; }
@@ -369,7 +408,7 @@
   <span style="font-family:var(--serif);font-size:1.05rem;color:#5ecfc5;font-weight:600;">NeuroAdapt</span>
   <div style="display:flex;align-items:center;gap:0.5rem;">
     <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Screening</a>
-
+    <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
     <button class="btn-chat-toggle" onclick="toggleChat()"><span class="dot"></span> Ask Nora AI</button>
   </div>
 </nav>
@@ -437,69 +476,71 @@
       <div class="card">
         <div class="card-title">🧠 Q-CHAT-10 Behavioral Milestones</div>
         <p style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:1.25rem;">
-          Toggle <strong>ON</strong> (left / teal) = milestone met (typical). 
-          Toggle <strong>OFF</strong> (right / grey) = milestone not observed (delayed).
-          Questions 9 &amp; 10 are reversed — toggle ON means the behaviour <em>is</em> present.
+          Answer each question based on what you observe <strong>most of the time</strong>.
+          Be honest — there are no wrong answers.
         </p>
 
         <div class="q-grid" id="qGrid">
-          <!-- Questions 1-8: ON=typical=0, OFF=delayed=1 -->
+
           {% set q_standard = [
-            ("A1",  "Responds to name when called",        "Looks toward you when you say their name"),
-            ("A2",  "Makes eye contact",                   "Holds eye contact naturally during interaction"),
-            ("A3",  "Points to indicate wants",            "Uses index finger to point at desired objects"),
-            ("A4",  "Points to share interest",            "Points at things just to show you, not to get them"),
-            ("A5",  "Engages in pretend play",             "Uses toys imaginatively (e.g. feeding a doll)"),
-            ("A6",  "Follows gaze / pointing",             "Looks where you look or point"),
-            ("A7",  "Uses basic words or speech",          "Says at least a few recognisable words"),
-            ("A8",  "Understands simple gestures",         "Responds to waving, pointing, or shaking head")
+            ("A1",  "Does your child respond when called by name?",       "Looks toward you when you say their name"),
+            ("A2",  "Does your child make eye contact with you?",          "Holds eye contact naturally during interaction"),
+            ("A3",  "Does your child point to ask for something?",         "Uses index finger to point at desired objects"),
+            ("A4",  "Does your child point just to show you something?",   "Points at things to share interest, not to get them"),
+            ("A5",  "Does your child engage in pretend play?",             "Uses toys imaginatively, e.g. feeding a doll"),
+            ("A6",  "Does your child follow where you look or point?",     "Looks where you look or point"),
+            ("A7",  "Does your child use basic words or speech?",          "Says at least a few recognisable words"),
+            ("A8",  "Does your child understand simple gestures?",         "Responds to waving, pointing, or head shaking")
           ] %}
 
-          {% for code, title, hint in q_standard %}
+          {% for code, question, hint in q_standard %}
           <div class="q-row" style="animation-delay: {{ loop.index * 0.04 }}s">
             <div class="q-num">{{ loop.index }}</div>
             <div class="q-text">
-              {{ title }}
+              {{ question }}
               <small>{{ hint }}</small>
             </div>
-            <div class="toggle-wrap">
-              <span class="toggle-label-off">Yes</span>
-              <label class="toggle" title="{{ title }}">
-                <input type="checkbox" class="q-toggle" data-field="{{ code }}" checked
-                       onchange="syncToggle(this)" />
-                <span class="slider"></span>
+            <div class="radio-wrap">
+              <label class="radio-opt yes-opt">
+                <input type="radio" name="{{ code }}" value="0" checked />
+                <span>Yes</span>
               </label>
-              <span class="toggle-label-on">No</span>
-              <input type="hidden" name="{{ code }}" id="val_{{ code }}" value="0" />
+              <label class="radio-opt no-opt">
+                <input type="radio" name="{{ code }}" value="1" />
+                <span>No</span>
+              </label>
             </div>
           </div>
           {% endfor %}
 
-          <!-- Questions 9-10: ON=atypical=1, OFF=typical=0 (inverted) -->
+          {# Questions 9-10: Yes = atypical = 1, No = typical = 0 #}
           {% set q_inverted = [
-            ("A9",  "Unusual sensory reactions",           "Over- or under-reacts to sounds, textures, lights"),
-            ("A10", "Repetitive or unusual behaviours",    "Hand-flapping, rocking, lining up objects, meltdowns")
+            ("A9",  "Does your child have unusual reactions to sounds, textures, or lights?",
+                    "Over- or under-reacts to sensory input"),
+            ("A10", "Does your child show repetitive or unusual behaviours?",
+                    "Hand-flapping, rocking, lining up objects, or meltdowns")
           ] %}
 
-          {% for code, title, hint in q_inverted %}
+          {% for code, question, hint in q_inverted %}
           <div class="q-row" style="animation-delay: {{ (loop.index + 8) * 0.04 }}s">
             <div class="q-num">{{ loop.index + 8 }}</div>
             <div class="q-text">
-              {{ title }}
+              {{ question }}
               <small>{{ hint }}</small>
             </div>
-            <div class="toggle-wrap">
-              <span class="toggle-label-off" style="color:var(--ink-soft)">No</span>
-              <label class="toggle invert" title="{{ title }}">
-                <input type="checkbox" class="q-toggle-inv" data-field="{{ code }}"
-                       onchange="syncToggleInv(this)" />
-                <span class="slider"></span>
+            <div class="radio-wrap">
+              <label class="radio-opt yes-opt">
+                <input type="radio" name="{{ code }}" value="1" checked />
+                <span>Yes</span>
               </label>
-              <span class="toggle-label-on" style="color:var(--amber)">Yes</span>
-              <input type="hidden" name="{{ code }}" id="val_{{ code }}" value="0" />
+              <label class="radio-opt no-opt">
+                <input type="radio" name="{{ code }}" value="0" />
+                <span>No</span>
+              </label>
             </div>
           </div>
           {% endfor %}
+
         </div>
       </div>
 
@@ -527,17 +568,24 @@
 </div>
 
 <script>
-  // ── Toggle sync (standard: checked=typical=0, unchecked=delayed=1) ──
-  function syncToggle(el) {
-    document.getElementById('val_' + el.dataset.field).value = el.checked ? 0 : 1;
-    updateProgress();
+
+  // ── Progress bar — counts rows where No is selected ──────────
+  function updateProgress() {
+    const total   = document.querySelectorAll('.q-row').length;
+    const answered = document.querySelectorAll('.q-row input[type="radio"]:checked').length;
+    // Each row has 2 radios, one always checked (default), so
+    // track changes from default instead
+    const changed = document.querySelectorAll(
+      '.q-row .no-opt input:checked, .q-row .yes-opt:not(:first-of-type) input:checked'
+    ).length;
+    const pct = Math.round((changed / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
   }
 
-  // ── Toggle sync (inverted: checked=atypical=1, unchecked=typical=0) ──
-  function syncToggleInv(el) {
-    document.getElementById('val_' + el.dataset.field).value = el.checked ? 1 : 0;
-    updateProgress();
-  }
+  document.querySelectorAll('.radio-opt input').forEach(el => {
+    el.addEventListener('change', updateProgress);
+  });
+
 
   // ── Top-N picker ──────────────────────────────────────────────────
   function setTopN(n) {

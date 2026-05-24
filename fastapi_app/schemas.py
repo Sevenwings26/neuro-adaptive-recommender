@@ -261,4 +261,12 @@ class ChatResponse(BaseModel):
     reply      : str
     latency_ms : float
 
+
+# class ChatResponse(BaseModel):
+#     """Response body for POST /chat."""
+#     reply: str = Field(..., description="AI assistant's response")
+#     latency_ms: float = Field(..., description="Response time in milliseconds")
     
+#     # Optional fields for better debugging and UX
+#     error: Optional[str] = Field(None, description="Error message if any")
+#     success: bool = Field(True, description="Whether the request was successful")

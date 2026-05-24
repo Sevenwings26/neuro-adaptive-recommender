@@ -21,40 +21,79 @@ from routers import api_router
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-load_dotenv()
+# load_dotenv()
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     log.info("Starting up…")
+#     state.startup_time = time.time()
+    
+#     try:
+#         _load_model()
+#         log.info("✓ Model loaded")
+        
+#         # _download_if_missing() 
+#         # log.info("✓ files downloaded loaded")
+
+#         _load_app_cache()
+#         log.info("✓ App cache loaded")
+        
+#         _init_gemini()
+#         log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
+        
+#         # Verify API key is loaded
+#         load_dotenv()
+#         api_key = os.getenv("GEMINI_API_KEY")
+#         log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
+        
+#     except Exception as e:
+#         log.error(f"Startup error: {e}")
+#         # Don't raise - allow app to start but with limited functionality
+    
+#     log.info(f"Startup complete in {time.time() - state.startup_time:.2f}s")
+#     log.info(f"Chat available: {state.gemini_client is not None}")
+    
+#     yield
+    
+#     log.info("Shutting down.")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    log.info("Starting up…")
+    log.info("Starting up Neuro-Adaptive ASD Recommender...")
+
     state.startup_time = time.time()
-    
+    startup_success = True
+
     try:
+        # Load environment variables (best done early)
+        load_dotenv(override=True)
+
         _load_model()
-        log.info("✓ Model loaded")
-        
-        # _download_if_missing() 
-        # log.info("✓ files downloaded loaded")
+        log.info("✓ Model loaded successfully")
 
         _load_app_cache()
-        log.info("✓ App cache loaded")
-        
-        # _init_gemini()
-        # log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
-        
-        # Verify API key is loaded
-        # load_dotenv()
-        # api_key = os.getenv("GEMINI_API_KEY")
-        # log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
-        
+        log.info(f"✓ App cache loaded — {len(state.df_apps)} apps")
+
+        _init_gemini()
+        log.info(f"✓ Gemini initialized: {state.gemini_client is not None}")
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            log.warning("⚠️ GEMINI_API_KEY is missing — Chat feature will be disabled")
+
     except Exception as e:
-        log.error(f"Startup error: {e}")
-        # Don't raise - allow app to start but with limited functionality
-    
-    log.info(f"Startup complete in {time.time() - state.startup_time:.2f}s")
+        log.error(f"❌ Critical startup error: {e}")
+        startup_success = False
+        # In production, you may choose to raise here for fail-fast behavior
+        # raise  # Uncomment in strict production mode
+
+    log.info(f"Startup completed in {time.time() - state.startup_time:.2f}s")
     log.info(f"Chat available: {state.gemini_client is not None}")
-    
+    log.info(f"Overall startup success: {startup_success}")
+
     yield
-    
+
     log.info("Shutting down.")
 
 
@@ -95,44 +134,6 @@ def index(request: Request):
         },
     )
 
-@app.get("/apps-page", response_class=HTMLResponse, tags=["UI"])
-def apps_page(request: Request):
-    """Render the apps catalogue page."""
-    try:
-        # Get the apps data
-        if state.df_apps.empty:
-            apps_list = []
-            total = 0
-        else:
-            apps_list = []
-            for _, row in state.df_apps.iterrows():
-                apps_list.append({
-                    "app_name": row["App_Name"],
-                    "category": row.get("Category", "Uncategorized"),
-                    "rating": float(row.get("Rating", 0)),
-                    "price": row.get("Price", "Free"),
-                    "description": row.get("Description", "No description available.")[:200],
-                })
-            total = len(apps_list)
-        
-        log.info(f"Rendering apps page with {total} apps")
-        
-        return templates.TemplateResponse(
-            request,
-            "all_apps.html",
-            context={
-                "apps": apps_list,
-                "total_apps": total,
-                "chat_available": state.gemini_client is not None,
-            },
-        )
-    except Exception as e:
-        log.error(f"Error rendering apps page: {e}")
-        import traceback
-        traceback.print_exc()
-        return HTMLResponse(f"<h1>Error</h1><pre>{str(e)}</pre>", status_code=500)
-
-
         
 @app.post("/screen", response_class=HTMLResponse, tags=["UI"])
 async def screen(
@@ -161,17 +162,33 @@ async def screen(
         app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
 
         profile_explained = ""
-        if high_risk and state.gemini_client:
+        if state.gemini_client:
             try:
                 profile_explained = await explain_profile(
-                    profile_text=profile_text,
-                    age=age,
-                    sex_label="Male" if sex == 1 else "Female",
-                    gemini_client=state.gemini_client,
+                    age              = age,
+                    sex_label        = "Male" if sex == 1 else "Female",
+                    risk_probability = round(risk, 1),
+                    total_flags      = total_flags,
+                    flagged_details  = flagged_details,
+                    profile_text     = profile_text,
+                    gemini_client    = state.gemini_client,
                 )
             except Exception as e:
-                log.error(f"explain_profile crashed: {e}")
+                log.error("explain_profile crashed: %s", e)
                 profile_explained = "We recommend focusing on communication and social engagement activities."
+
+        # profile_explained = ""
+        # if state.gemini_client:
+        #     try:
+        #         profile_explained = await explain_profile(
+        #             profile_text=profile_text,
+        #             age=age,
+        #             sex_label="Male" if sex == 1 else "Female",
+        #             gemini_client=state.gemini_client,
+        #         )
+        #     except Exception as e:
+        #         log.error(f"explain_profile crashed: {e}")
+        #         profile_explained = "We recommend focusing on communication and social engagement activities."
                 
         flagged_details = [
             {"code": k, "label": QUESTION_LABELS[k]}
@@ -222,6 +239,47 @@ async def screen(
               file=sys.stderr)
         
 
+@app.get("/apps-page", response_class=HTMLResponse, tags=["UI"])
+def apps_page(request: Request):
+    """Render the apps catalogue page."""
+    try:
+        # Get the apps data
+        if state.df_apps.empty:
+            apps_list = []
+            total = 0
+        else:
+            apps_list = []
+            for _, row in state.df_apps.iterrows():
+                apps_list.append({
+                    "app_name": row["App_Name"],
+                    "category": row.get("Category", "Uncategorized"),
+                    "rating": float(row.get("Rating", 0)),
+                    "price": row.get("Price", "Free"),
+                    "description": row.get("Description", "No description available.")[:200],
+                })
+            total = len(apps_list)
+        
+        log.info(f"Rendering apps page with {total} apps")
+        
+        return templates.TemplateResponse(
+            request,
+            "all_apps.html",
+            context={
+                "apps": apps_list,
+                "total_apps": total,
+                "chat_available": state.gemini_client is not None,
+            },
+        )
+    except Exception as e:
+        log.error(f"Error rendering apps page: {e}")
+        import traceback
+        traceback.print_exc()
+        return HTMLResponse(f"<h1>Error</h1><pre>{str(e)}</pre>", status_code=500)
+
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
 

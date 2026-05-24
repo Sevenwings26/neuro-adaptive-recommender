@@ -50,13 +50,13 @@ import streamlit as st
 # =========================================================
 @st.cache_resource
 def load_model():
-    return joblib.load("asd_model.pkl")
+    return joblib.load("asd_model1.pkl")
 
 try:
     model = load_model()
 
 except FileNotFoundError:
-    st.error("Model file 'asd_model.pkl' not found.")
+    st.error("Model file 'asd_model1.pkl' not found.")
     st.stop()
 
 except Exception as e:

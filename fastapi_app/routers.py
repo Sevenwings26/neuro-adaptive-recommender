@@ -139,6 +139,8 @@ def chat(request: ChatRequest):
         + [{"role": "user", "parts": [{"text": request.message}]}]
     )
 
+    reply = "I'm sorry, I'm having trouble responding right now. Please try again in a moment."
+
     try:
         response = state.gemini_client.models.generate_content(
             model    = GEMINI_MODEL,
@@ -147,7 +149,7 @@ def chat(request: ChatRequest):
         reply = response.text
     except Exception as e:
         log.error("Gemini chat error: %s", e)
-        raise HTTPException(status_code=502, detail=f"AI service error: {e}")
+        # raise HTTPException(status_code=502, detail=f"AI service error: {e}")
 
     return ChatResponse(
         reply      = reply,
