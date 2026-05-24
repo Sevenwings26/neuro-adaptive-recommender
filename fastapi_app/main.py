@@ -21,6 +21,7 @@ from routers import api_router
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
