@@ -37,11 +37,11 @@ async def lifespan(app: FastAPI):
         _load_app_cache()
         log.info("✓ App cache loaded")
         
-        _init_gemini()
-        log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
+        # _init_gemini()
+        # log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
         
         # Verify API key is loaded
-        load_dotenv()
+        # load_dotenv()
         # api_key = os.getenv("GEMINI_API_KEY")
         # log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
         
@@ -117,9 +117,9 @@ def apps_page(request: Request):
         log.info(f"Rendering apps page with {total} apps")
         
         return templates.TemplateResponse(
+            request,
             "all_apps.html",
-            {
-                "request": request,
+            context={
                 "apps": apps_list,
                 "total_apps": total,
                 "chat_available": state.gemini_client is not None,
@@ -189,9 +189,9 @@ async def screen(
         }
 
         return templates.TemplateResponse(
-            "results.html",
-            {
-                "request": request,
+        request,
+        "results.html",
+        context={
                 "age": age,
                 "sex_label": "Male" if sex == 1 else "Female",
                 "risk_probability": round(risk, 1),
@@ -220,7 +220,6 @@ async def screen(
         print(f"\n{'='*80}\nERROR IN /screen:\n{full_traceback}\n{'='*80}\n", 
               file=sys.stderr)
         
-    
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
