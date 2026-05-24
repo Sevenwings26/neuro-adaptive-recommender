@@ -1,4 +1,4 @@
-# Neuro-Adaptive ASD Recommender (NALR)
+# Neuro-Adaptive ASD Learning Recommender (NALR)
 
 **Bridging the Diagnostic Gap: AI-Powered Early Intervention for Toddlers**
 
