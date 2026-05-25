@@ -183,20 +183,6 @@ async def screen(
                 log.error("explain_profile crashed: %s", e)
                 profile_explained = "We recommend focusing on communication and social engagement activities."
 
-        # profile_explained = ""
-        # if state.gemini_client:
-        #     try:
-        #         profile_explained = await explain_profile(
-        #             profile_text=profile_text,
-        #             age=age,
-        #             sex_label="Male" if sex == 1 else "Female",
-        #             gemini_client=state.gemini_client,
-        #         )
-        #     except Exception as e:
-        #         log.error(f"explain_profile crashed: {e}")
-        #         profile_explained = "We recommend focusing on communication and social engagement activities."
-                
-
         screening_context = {
             "age": age,
             "sex_label": "Male" if sex == 1 else "Female",
@@ -285,3 +271,107 @@ if __name__ == "__main__":
 
 
 
+# @app.post("/screen", response_class=HTMLResponse, tags=["UI"])
+# async def screen(
+#     request: Request,
+#     age: int = Form(...), sex: int = Form(...),
+#     A1: int = Form(...), A2: int = Form(...), A3: int = Form(...),
+#     A4: int = Form(...), A5: int = Form(...), A6: int = Form(...),
+#     A7: int = Form(...), A8: int = Form(...), A9: int = Form(...),
+#     A10: int = Form(...),
+#     top_n: int = Form(3),
+# ):
+
+#     try:
+#         log.info(f"Processing screen request: age={age}, sex={sex}, top_n={top_n}")
+#         """Process the form, run inference, render results page."""
+#         scores = {
+#             "A1": A1, "A2": A2, "A3": A3, "A4": A4, "A5": A5,
+#             "A6": A6, "A7": A7, "A8": A8, "A9": A9, "A10": A10,
+#             "Sex": sex,
+#         }
+    
+#         risk = predict_risk(scores)
+#         high_risk = risk >= 50.0
+#         total_flags = sum(v for k, v in scores.items() if k.startswith("A"))
+#         profile_text = build_profile_text(scores) if high_risk else ""
+#         app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
+
+#         flagged_details = [
+#             {"code": k, "label": QUESTION_LABELS[k]}
+#             for k in QUESTION_LABELS if scores.get(k, 0) == 1
+#         ]
+
+#         profile_explained = ""
+#         if state.gemini_client:
+#             try:
+#                 profile_explained = await explain_profile(
+#                     age              = age,
+#                     sex_label        = "Male" if sex == 1 else "Female",
+#                     risk_probability = round(risk, 1),
+#                     total_flags      = total_flags,
+#                     flagged_details  = flagged_details,
+#                     profile_text     = profile_text,
+#                     gemini_client    = state.gemini_client,
+#                 )
+#             except Exception as e:
+#                 log.error("explain_profile crashed: %s", e)
+#                 profile_explained = "We recommend focusing on communication and social engagement activities."
+
+#         # profile_explained = ""
+#         # if state.gemini_client:
+#         #     try:
+#         #         profile_explained = await explain_profile(
+#         #             profile_text=profile_text,
+#         #             age=age,
+#         #             sex_label="Male" if sex == 1 else "Female",
+#         #             gemini_client=state.gemini_client,
+#         #         )
+#         #     except Exception as e:
+#         #         log.error(f"explain_profile crashed: {e}")
+#         #         profile_explained = "We recommend focusing on communication and social engagement activities."
+                
+
+#         screening_context = {
+#             "age": age,
+#             "sex_label": "Male" if sex == 1 else "Female",
+#             "risk_probability": round(risk, 1),
+#             "total_flags": total_flags,
+#             "flagged_questions": [f"{d['code']}: {d['label']}" for d in flagged_details],
+#             "recommended_apps": [r.app_name for r in app_recs],
+#             "profile_text": profile_text,
+#             "profile_explained": profile_explained, # human-readable — shown in UI
+#         }
+
+#         return templates.TemplateResponse(
+#         request,
+#         "results.html",
+#         context={
+#                 "age": age,
+#                 "sex_label": "Male" if sex == 1 else "Female",
+#                 "risk_probability": round(risk, 1),
+#                 "high_risk": high_risk,
+#                 "total_flags": total_flags,
+#                 "flagged_details": flagged_details,
+#                 "profile_text": profile_text,
+#                 "profile_explained": profile_explained,
+#                 "recommendations": app_recs,
+#                 "model_card": state.model_card,
+#                 "screening_context": json.dumps(screening_context),
+#                 "chat_available": state.gemini_client is not None,
+#             },
+#         )
+        
+#     except Exception as e:
+#         # Get full traceback
+#         exc_type, exc_value, exc_traceback = sys.exc_info()
+#         tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+#         full_traceback = "".join(tb_lines)
+        
+#         # Log to both file and console
+#         log.error(f"SCREEN ENDPOINT FAILED:\n{full_traceback}")
+        
+#         # Print to stderr as well (uvicorn will capture this)
+#         print(f"\n{'='*80}\nERROR IN /screen:\n{full_traceback}\n{'='*80}\n", 
+#               file=sys.stderr)
+        

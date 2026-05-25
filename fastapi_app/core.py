@@ -285,39 +285,3 @@ def recommend_apps(profile_text: str, top_n: int) -> list[RecommendedApp]:
     ]
 
 
-
-    
-# async def explain_profile(
-#     profile_text: str,
-#     age: int,
-#     sex_label: str,
-#     gemini_client,
-# ) -> str:
-#     """
-#     Ask Gemini to translate the raw TF-IDF profile_text into a
-#     plain-English summary of the child's developmental needs.
-#     Returns a fallback string if Gemini is unavailable.
-#     """
-#     if not gemini_client or not profile_text:
-#         return profile_text   # graceful fallback — show raw text
-
-#     prompt = f"""
-#         A {age}-month-old {sex_label} toddler has been screened using the Q-CHAT-10 tool.
-#         Their developmental needs profile was identified as: "{profile_text}".
-
-#         In 2–3 warm, plain-English sentences, explain to the parent what this means
-#         for their child's day-to-day development. Focus on what the child may be
-#         finding difficult, not on labels or diagnoses. No bullet points. No medical jargon.
-#     """
-    
-#     try:
-#         response = gemini_client.models.generate_content(
-#             model    = GEMINI_MODEL,
-#             contents = [{"role": "user", "parts": [{"text": prompt}]}],
-#         )
-#         return response.text.strip()
-#     except Exception as e:
-#         log.warning("Profile explanation failed: %s", e)
-#         return profile_text   # fallback to raw text on any error
-
-

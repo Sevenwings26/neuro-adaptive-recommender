@@ -50,7 +50,7 @@
     "validate_parameters": null,
     "verbosity": null
   },
-  "training_samples": 4860,
+  "training_samples": 6075,
   "test_samples": 1215,
   "positive_rate_train": 0.2969,
   "trained_on": "2026-05-21T12:36:43.008185Z",
