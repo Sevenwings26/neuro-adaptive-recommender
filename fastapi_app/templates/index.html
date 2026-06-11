@@ -420,17 +420,18 @@
     <div class="sidebar-logo">Neuro<span>Adapt</span>
       <br/>Learning <br/>Recommender<span>(NALR)</span></div>
 
+   <!--
     <div class="sidebar-meta">
       <div class="meta-chip">Model &nbsp;<strong>{{ model_card.get('model_type', 'XGBoost') }}</strong></div>
       <div class="meta-chip">Accuracy &nbsp;<strong>{{ "%.1f"|format(model_card.get('test_accuracy', 0) * 100) }}%</strong></div>
       <div class="meta-chip">ROC-AUC &nbsp;<strong>{{ "%.3f"|format(model_card.get('test_roc_auc', 0)) }}</strong></div>
       <div class="meta-chip">Apps in cache &nbsp;<strong>{{ apps_count }}</strong></div>
     </div>
+    --> 
 
     <p class="sidebar-desc">
       Early screening for Autism Spectrum Disorder (ASD) traits in toddlers
-      aged 12–36 months, using the validated Q-CHAT-10 instrument.
-      Matched to educational resources via NLP.
+      aged 12–36 months, matched to educational resources via NLP.
     </p>
 
     <div class="disclaimer">
@@ -445,7 +446,7 @@
     <h1 class="page-heading">Toddler ASD <em>Screening</em></h1>
     <p class="page-sub">
       Complete all 12 fields below. The form takes about 2 minutes.
-      Responses are analysed instantly by our trained XGBoost classifier.
+      Responses are analysed instantly by our trained model.
     </p>
 
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -475,7 +476,7 @@
 
       <!-- Q-CHAT-10 -->
       <div class="card">
-        <div class="card-title">🧠 Q-CHAT-10 Behavioral Milestones</div>
+        <div class="card-title">🧠 10 Behavioral Milestones</div>
         <p style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:1.25rem;">
           Answer each question based on what you observe <strong>most of the time</strong>.
           Be honest — there are no wrong answers.

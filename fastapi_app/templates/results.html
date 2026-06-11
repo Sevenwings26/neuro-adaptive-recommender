@@ -505,10 +505,12 @@
   {% endif %}
   <!-- Model card footer -->
   <div class="model-footer">
-    <div class="mf-chip">Model <strong>{{ model_card.get('model_type','XGBoost') }}</strong></div>
+    <!--
+      <div class="mf-chip">Model <strong>{{ model_card.get('model_type','XGBoost') }}</strong></div>
     <div class="mf-chip">Accuracy <strong>{{ "%.1f"|format(model_card.get('test_accuracy',0)*100) }}%</strong></div>
     <div class="mf-chip">ROC-AUC <strong>{{ "%.3f"|format(model_card.get('test_roc_auc',0)) }}</strong></div>
     <div class="mf-chip">Trained on <strong>{{ model_card.get('training_samples','?') }} samples</strong></div>
+    -->
   </div>
 
   <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--ink-soft);text-align:center;">

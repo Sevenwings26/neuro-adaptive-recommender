@@ -157,7 +157,7 @@ async def screen(
         }
     
         risk = predict_risk(scores)
-        high_risk = risk >= 50.0
+        high_risk = risk >= 50.0   # Threshold for high risk  
         total_flags = sum(v for k, v in scores.items() if k.startswith("A"))
         profile_text = build_profile_text(scores) if high_risk else ""
         app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
