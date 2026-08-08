@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Neuro-Adaptive Recommender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f1923;
+      --ink-soft:  #445566;
+      --paper:     #f7f4ee;
+      --cream:     #ede9df;
+      --teal:      #0d7a6e;
+      --teal-lt:   #e0f4f2;
+      --amber:     #d97b00;
+      --amber-lt:  #fff4e0;
+      --danger:    #c0392b;
+      --danger-lt: #fdecea;
+      --border:    #d8d2c5;
+      --shadow:    0 8px 32px rgba(15,25,35,0.12);
+      --radius:    16px;
+      --sans:      'Outfit', sans-serif;
+      --serif:     'Fraunces', Georgia, serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-header {
+      background: var(--ink);
+      color: #fff;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .brand-logo {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .brand-logo span { color: #5ecfc5; }
+
+    .brand-tagline {
+      font-size: 0.85rem;
+      color: #8fa4b0;
+      margin-top: 0.5rem;
+    }
+
+    .form-body {
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-heading {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 0.25rem;
+      text-align: center;
+    }
+
+    .form-sub {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+
+    .field input {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--paper);
+      transition: all 0.2s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--teal-lt);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover { background: #0a6359; }
+    .btn-submit:active { transform: scale(0.99); }
+
+    .error-alert {
+      background: var(--danger-lt);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      display: none;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .footer-links {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      margin-top: 0.5rem;
+    }
+
+    .footer-links a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <header class="brand-header">
+    <div class="brand-logo">Neuro<span>Adapt</span></div>
+    <div class="brand-tagline">Early Screening & Recommendation Platform</div>
+  </header>
+
+  <form class="form-body" id="loginForm">
+    <div>
+      <h2 class="form-heading">Welcome Back</h2>
+      <p class="form-sub">Sign in to access your screening panel</p>
+    </div>
+
+    <div class="success-alert" id="successAlert" style="background:#e0f4f2; border:1px solid var(--teal); color:var(--teal); border-radius:8px; padding:0.75rem 1rem; font-size:0.88rem; display:none; margin-bottom: 0.5rem; text-align: center;">Account registered successfully! Please sign in.</div>
+    <div class="error-alert" id="errorAlert"></div>
+
+    <div class="field">
+      <label for="username_or_email">Username or Email</label>
+      <input type="text" id="username_or_email" required placeholder="e.g. jane_parent" />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="••••••••" />
+    </div>
+
+    <button type="submit" class="btn-submit">Sign In →</button>
+
+    <div class="footer-links">
+      Don't have an account? <a href="/register">Create one here</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("registered") === "1") {
+      document.getElementById("successAlert").style.display = "block";
+    }
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const errorAlert = document.getElementById("errorAlert");
+    errorAlert.style.display = "none";
+
+    const username_or_email = document.getElementById("username_or_email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username_or_email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Authentication failed.");
+      }
+
+      // Save token in cookie
+      document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
+      
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (err) {
+      errorAlert.textContent = err.message;
+      errorAlert.style.display = "block";
+    }
+  });
+</script>
+
+</body>
+</html>

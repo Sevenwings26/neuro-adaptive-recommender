@@ -21,6 +21,9 @@ __pycache__/
 .venv/
 
 .vercelignore/
-api/
+api/    # drop folder
 vercel.json
+
+/_dump 
+
 

@@ -402,12 +402,18 @@
 <!-- ── Topbar ─────────────────────────────────────────────────────── -->
 <nav class="topbar">
   <a href="/" class="topbar-brand">NeuroAdapt</a>
-  <div class="topbar-actions">
+  <div class="topbar-actions" style="display:flex;align-items:center;gap:0.75rem;">
+    {% if user %}
+    <span style="font-family:var(--mono);font-size:0.74rem;color:#8fa4b8;margin-right:0.5rem;">User: <strong style="color:#5ecfc5;">{{ user.username }}</strong> ({{ user.role }})</span>
+    {% endif %}
     <button class="btn-chat-toggle" onclick="toggleChat()" id="chatToggleBtn">
       <span class="dot"></span> Ask Nora AI
     </button>
     <a href="/" class="topbar-back">← New Screening</a>
     <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
+    {% if user %}
+    <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;">Logout</button>
+    {% endif %}
   </div>
 </nav>
 
@@ -525,6 +531,24 @@
 <script>
   const SCREENING_CONTEXT = {{ screening_context | safe }};
   const IS_RESULTS_PAGE   = true;
+</script>
+
+<script>
+  async function logout() {
+    try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+      if (token) {
+        await fetch('/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+    } catch (e) {
+      console.error("Logout API call failed:", e);
+    }
+    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+    window.location.href = "/login";
+  }
 </script>
 
 {% set is_results_page = true %}

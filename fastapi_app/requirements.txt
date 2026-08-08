@@ -66,3 +66,7 @@ uvicorn==0.47.0
 watchdog==6.0.0
 websockets==16.0
 xgboost==3.2.0
+PyJWT==2.8.0
+bcrypt==4.1.2
+SQLAlchemy==2.0.28
+

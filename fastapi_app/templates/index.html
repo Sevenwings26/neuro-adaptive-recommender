@@ -392,24 +392,128 @@
   color: var(--danger, #c0392b);
 }
 
+    /* ── Topbar ──────────────────────────────────────────────────── */
+    .topbar {
+      background: var(--ink);
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .topbar-brand {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      color: #5ecfc5;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .user-chip {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: #a0b4c0;
+      margin-right: 0.5rem;
+    }
+    .user-chip strong {
+      color: #5ecfc5;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 24px;
+      height: 18px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 2px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.25s ease-in-out;
+    }
+
     /* ── Responsive ──────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .shell { grid-template-columns: 1fr; }
       .sidebar { position: static; height: auto; }
       .main { padding: 2rem 1.25rem; }
       .demo-row { grid-template-columns: 1fr; }
+
+      .menu-toggle {
+        display: flex;
+      }
+      .menu-toggle.open .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+      }
+      .menu-toggle.open .bar:nth-child(2) {
+        opacity: 0;
+      }
+      .menu-toggle.open .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+      }
+      .topbar {
+        padding: 0.8rem 1.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+      .topbar-actions.open {
+        display: flex;
+      }
+      .user-chip {
+        width: 100%;
+        text-align: center;
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+      }
     }
   </style>
 </head>
 <body>
 
 <!-- ── Topbar ──────────────────────────────────────────────────── -->
-<nav style="background:var(--ink);padding:0.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
-  <span style="font-family:var(--serif);font-size:1.05rem;color:#5ecfc5;font-weight:600;">NeuroAdapt</span>
-  <div style="display:flex;align-items:center;gap:0.5rem;">
+<nav class="topbar">
+  <span class="topbar-brand">NeuroAdapt</span>
+  
+  <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Menu">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+  
+  <div class="topbar-actions" id="topbarActions">
+    {% if user %}
+    <span class="user-chip">User: <strong>{{ user.username }}</strong> ({{ user.role }})</span>
+    {% endif %}
     <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Screening</a>
     <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
     <button class="btn-chat-toggle" onclick="toggleChat()"><span class="dot"></span> Ask Nora AI</button>
+    {% if user %}
+    <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;margin-left:0.25rem;">Logout</button>
+    {% endif %}
   </div>
 </nav>
 
@@ -620,6 +724,29 @@
   document.querySelectorAll('.q-row').forEach((row, i) => {
     row.style.animationDelay = (i * 0.04) + 's';
   });
+
+  function toggleMenu() {
+    const toggleBtn = document.getElementById('menuToggle');
+    const actions = document.getElementById('topbarActions');
+    toggleBtn.classList.toggle('open');
+    actions.classList.toggle('open');
+  }
+
+  async function logout() {
+    try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
+      if (token) {
+        await fetch('/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+    } catch (e) {
+      console.error("Logout API call failed:", e);
+    }
+    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+    window.location.href = "/login";
+  }
 </script>
 
 <!-- Default context for index page: no screening run yet -->

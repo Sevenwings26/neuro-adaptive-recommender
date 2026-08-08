@@ -1,8 +1,7 @@
-# routers.py
+# routers/recommend_router.py
 import time
-from fastapi import APIRouter, HTTPException
-
-from schemas import (
+from fastapi import APIRouter, HTTPException, Depends
+from schemas.recommend import (
     PredictRequest, PredictResponse,
     RecommendRequest, RecommendResponse,
     HealthResponse, AppsResponse, AppItem,
@@ -12,11 +11,13 @@ from core import (
     state, predict_risk, recommend_apps,
     build_profile_text, QUESTION_LABELS, CHAT_SYSTEM_PROMPT, GEMINI_MODEL, log
 )
+from services.auth_service import get_current_user, RoleChecker
+from models.auth_models import User
 
-api_router = APIRouter()
+recommend_router = APIRouter()
 
 
-@api_router.get("/health", response_model=HealthResponse, tags=["System"])
+@recommend_router.get("/health", response_model=HealthResponse, tags=["System"])
 def health():
     return HealthResponse(
         status        = "ok",
@@ -30,8 +31,8 @@ def health():
     )
 
 
-@api_router.get("/apps", response_model=AppsResponse, tags=["Apps"])
-def list_apps():
+@recommend_router.get("/apps", response_model=AppsResponse, tags=["Apps"])
+def list_apps(current_user: User = Depends(RoleChecker(["parent", "clinician"]))):
     if state.df_apps.empty:
         raise HTTPException(status_code=503, detail="App cache not loaded.")
     apps = [
@@ -47,8 +48,11 @@ def list_apps():
     return AppsResponse(total=len(apps), apps=apps)
 
 
-@api_router.post("/predict", response_model=PredictResponse, tags=["Inference"])
-def predict(request: PredictRequest):
+@recommend_router.post("/predict", response_model=PredictResponse, tags=["Inference"])
+def predict(
+    request: PredictRequest,
+    current_user: User = Depends(RoleChecker(["parent", "clinician"]))
+):
     t0     = time.time()
     scores = request.model_dump()
     risk   = predict_risk(scores)
@@ -66,8 +70,11 @@ def predict(request: PredictRequest):
     )
 
 
-@api_router.post("/recommend", response_model=RecommendResponse, tags=["Inference"])
-def recommend(request: RecommendRequest):
+@recommend_router.post("/recommend", response_model=RecommendResponse, tags=["Inference"])
+def recommend(
+    request: RecommendRequest,
+    current_user: User = Depends(RoleChecker(["parent", "clinician"]))
+):
     t0          = time.time()
     scores      = request.model_dump(exclude={"top_n"})
     risk        = predict_risk(scores)
@@ -101,8 +108,11 @@ def recommend(request: RecommendRequest):
     )
 
 
-@api_router.post("/chat", response_model=ChatResponse, tags=["Chat"])
-def chat(request: ChatRequest):
+@recommend_router.post("/chat", response_model=ChatResponse, tags=["Chat"])
+def chat(
+    request: ChatRequest,
+    current_user: User = Depends(RoleChecker(["parent", "clinician"]))
+):
     if state.gemini_client is None:
         raise HTTPException(
             status_code=503,
@@ -149,10 +159,8 @@ def chat(request: ChatRequest):
         reply = response.text
     except Exception as e:
         log.error("Gemini chat error: %s", e)
-        # raise HTTPException(status_code=502, detail=f"AI service error: {e}")
 
     return ChatResponse(
         reply      = reply,
         latency_ms = round((time.time() - t0) * 1000, 1),
     )
-

@@ -1,8 +1,8 @@
 # main.py
 from contextlib import asynccontextmanager
 import uvicorn
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Form, Request, Depends
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import json
 import time 
@@ -10,52 +10,20 @@ import traceback
 import os
 from dotenv import load_dotenv
 import sys
+from typing import Optional
+from sqlalchemy.orm import Session
 
+from database import get_db
+from services.auth_service import AuthService
+from repositories.user_repository import UserRepository
+from models.auth_models import User
 from core import (
     state, _load_model, _load_app_cache, _init_gemini, 
-    # _download_if_missing, 
     predict_risk, recommend_apps, build_profile_text, explain_profile, QUESTION_LABELS, log
 )
 from routers import api_router
-
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-
-# load_dotenv()
-
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     log.info("Starting up…")
-#     state.startup_time = time.time()
-    
-#     try:
-#         _load_model()
-#         log.info("✓ Model loaded")
-        
-#         # _download_if_missing() 
-#         # log.info("✓ files downloaded loaded")
-
-#         _load_app_cache()
-#         log.info("✓ App cache loaded")
-        
-#         _init_gemini()
-#         log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
-        
-#         # Verify API key is loaded
-#         load_dotenv()
-#         api_key = os.getenv("GEMINI_API_KEY")
-#         log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
-        
-#     except Exception as e:
-#         log.error(f"Startup error: {e}")
-#         # Don't raise - allow app to start but with limited functionality
-    
-#     log.info(f"Startup complete in {time.time() - state.startup_time:.2f}s")
-#     log.info(f"Chat available: {state.gemini_client is not None}")
-    
-#     yield
-    
-#     log.info("Shutting down.")
+import models.auth_models
+from database import engine, Base
 
 
 @asynccontextmanager
@@ -68,6 +36,10 @@ async def lifespan(app: FastAPI):
     try:
         # Load .env only if it exists (for local development)
         load_dotenv(override=True)
+
+        # Initialize database tables
+        Base.metadata.create_all(bind=engine)
+        log.info("✓ Database tables initialized successfully")
 
         _load_model()
         log.info("✓ Model loaded successfully")
@@ -122,13 +94,44 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+# Helper to retrieve current authenticated user from cookies (for Jinja UI routes)
+async def get_current_user_from_cookie(request: Request, db: Session = Depends(get_db)) -> Optional[User]:
+    token = request.cookies.get("access_token")
+    if not token:
+        return None
+    try:
+        token_data = AuthService.verify_access_token(token)
+        return UserRepository.get_by_username(db, token_data.username)
+    except Exception:
+        return None
+
+
+@app.get("/login", response_class=HTMLResponse, tags=["UI"])
+def login_page(request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)):
+    """Render the login page. If already authenticated, redirect to screening form."""
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse(request, "login.html")
+
+
+@app.get("/register", response_class=HTMLResponse, tags=["UI"])
+def register_page(request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)):
+    """Render the registration page. If already authenticated, redirect to screening form."""
+    if user:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse(request, "register.html")
+
+
 @app.get("/", response_class=HTMLResponse, tags=["UI"])
-def index(request: Request):
-    """Render the screening form."""
+def index(request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)):
+    """Render the screening form. Restricted to authenticated users."""
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
     return templates.TemplateResponse(
         request,
         "index.html",
         context={
+            "user"          : user,
             "model_card"    : state.model_card,
             "apps_count"    : len(state.df_apps),
             "chat_available": state.gemini_client is not None,  
@@ -145,7 +148,10 @@ async def screen(
     A7: int = Form(...), A8: int = Form(...), A9: int = Form(...),
     A10: int = Form(...),
     top_n: int = Form(3),
+    user: Optional[User] = Depends(get_current_user_from_cookie),
 ):
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
 
     try:
         log.info(f"Processing screen request: age={age}, sex={sex}, top_n={top_n}")
@@ -195,9 +201,10 @@ async def screen(
         }
 
         return templates.TemplateResponse(
-        request,
-        "results.html",
-        context={
+            request,
+            "results.html",
+            context={
+                "user": user,
                 "age": age,
                 "sex_label": "Male" if sex == 1 else "Female",
                 "risk_probability": round(risk, 1),
@@ -228,8 +235,11 @@ async def screen(
         
 
 @app.get("/apps-page", response_class=HTMLResponse, tags=["UI"])
-def apps_page(request: Request):
-    """Render the apps catalogue page."""
+def apps_page(request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)):
+    """Render the apps catalogue page. Restricted to authenticated users."""
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+
     try:
         # Get the apps data
         if state.df_apps.empty:
@@ -253,6 +263,7 @@ def apps_page(request: Request):
             request,
             "all_apps.html",
             context={
+                "user": user,
                 "apps": apps_list,
                 "total_apps": total,
                 "chat_available": state.gemini_client is not None,
@@ -271,107 +282,43 @@ if __name__ == "__main__":
 
 
 
-# @app.post("/screen", response_class=HTMLResponse, tags=["UI"])
-# async def screen(
-#     request: Request,
-#     age: int = Form(...), sex: int = Form(...),
-#     A1: int = Form(...), A2: int = Form(...), A3: int = Form(...),
-#     A4: int = Form(...), A5: int = Form(...), A6: int = Form(...),
-#     A7: int = Form(...), A8: int = Form(...), A9: int = Form(...),
-#     A10: int = Form(...),
-#     top_n: int = Form(3),
-# ):
 
-#     try:
-#         log.info(f"Processing screen request: age={age}, sex={sex}, top_n={top_n}")
-#         """Process the form, run inference, render results page."""
-#         scores = {
-#             "A1": A1, "A2": A2, "A3": A3, "A4": A4, "A5": A5,
-#             "A6": A6, "A7": A7, "A8": A8, "A9": A9, "A10": A10,
-#             "Sex": sex,
-#         }
+
+
+
+# load_dotenv()
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     log.info("Starting up…")
+#     state.startup_time = time.time()
     
-#         risk = predict_risk(scores)
-#         high_risk = risk >= 50.0
-#         total_flags = sum(v for k, v in scores.items() if k.startswith("A"))
-#         profile_text = build_profile_text(scores) if high_risk else ""
-#         app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
+#     try:
+#         _load_model()
+#         log.info("✓ Model loaded")
+        
+#         # _download_if_missing() 
+#         # log.info("✓ files downloaded loaded")
 
-#         flagged_details = [
-#             {"code": k, "label": QUESTION_LABELS[k]}
-#             for k in QUESTION_LABELS if scores.get(k, 0) == 1
-#         ]
-
-#         profile_explained = ""
-#         if state.gemini_client:
-#             try:
-#                 profile_explained = await explain_profile(
-#                     age              = age,
-#                     sex_label        = "Male" if sex == 1 else "Female",
-#                     risk_probability = round(risk, 1),
-#                     total_flags      = total_flags,
-#                     flagged_details  = flagged_details,
-#                     profile_text     = profile_text,
-#                     gemini_client    = state.gemini_client,
-#                 )
-#             except Exception as e:
-#                 log.error("explain_profile crashed: %s", e)
-#                 profile_explained = "We recommend focusing on communication and social engagement activities."
-
-#         # profile_explained = ""
-#         # if state.gemini_client:
-#         #     try:
-#         #         profile_explained = await explain_profile(
-#         #             profile_text=profile_text,
-#         #             age=age,
-#         #             sex_label="Male" if sex == 1 else "Female",
-#         #             gemini_client=state.gemini_client,
-#         #         )
-#         #     except Exception as e:
-#         #         log.error(f"explain_profile crashed: {e}")
-#         #         profile_explained = "We recommend focusing on communication and social engagement activities."
-                
-
-#         screening_context = {
-#             "age": age,
-#             "sex_label": "Male" if sex == 1 else "Female",
-#             "risk_probability": round(risk, 1),
-#             "total_flags": total_flags,
-#             "flagged_questions": [f"{d['code']}: {d['label']}" for d in flagged_details],
-#             "recommended_apps": [r.app_name for r in app_recs],
-#             "profile_text": profile_text,
-#             "profile_explained": profile_explained, # human-readable — shown in UI
-#         }
-
-#         return templates.TemplateResponse(
-#         request,
-#         "results.html",
-#         context={
-#                 "age": age,
-#                 "sex_label": "Male" if sex == 1 else "Female",
-#                 "risk_probability": round(risk, 1),
-#                 "high_risk": high_risk,
-#                 "total_flags": total_flags,
-#                 "flagged_details": flagged_details,
-#                 "profile_text": profile_text,
-#                 "profile_explained": profile_explained,
-#                 "recommendations": app_recs,
-#                 "model_card": state.model_card,
-#                 "screening_context": json.dumps(screening_context),
-#                 "chat_available": state.gemini_client is not None,
-#             },
-#         )
+#         _load_app_cache()
+#         log.info("✓ App cache loaded")
+        
+#         _init_gemini()
+#         log.info(f"✓ Gemini client initialized: {state.gemini_client is not None}")
+        
+#         # Verify API key is loaded
+#         load_dotenv()
+#         api_key = os.getenv("GEMINI_API_KEY")
+#         log.info(f"GEMINI_API_KEY from env: {'✓ Present' if api_key else '✗ Missing'}")
         
 #     except Exception as e:
-#         # Get full traceback
-#         exc_type, exc_value, exc_traceback = sys.exc_info()
-#         tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-#         full_traceback = "".join(tb_lines)
-        
-#         # Log to both file and console
-#         log.error(f"SCREEN ENDPOINT FAILED:\n{full_traceback}")
-        
-#         # Print to stderr as well (uvicorn will capture this)
-#         print(f"\n{'='*80}\nERROR IN /screen:\n{full_traceback}\n{'='*80}\n", 
-#               file=sys.stderr)
-        
+#         log.error(f"Startup error: {e}")
+#         # Don't raise - allow app to start but with limited functionality
+    
+#     log.info(f"Startup complete in {time.time() - state.startup_time:.2f}s")
+#     log.info(f"Chat available: {state.gemini_client is not None}")
+    
+#     yield
+    
+#     log.info("Shutting down.")
+

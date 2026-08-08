@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Neuro-Adaptive Recommender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f1923;
+      --ink-soft:  #445566;
+      --paper:     #f7f4ee;
+      --cream:     #ede9df;
+      --teal:      #0d7a6e;
+      --teal-lt:   #e0f4f2;
+      --amber:     #d97b00;
+      --amber-lt:  #fff4e0;
+      --danger:    #c0392b;
+      --danger-lt: #fdecea;
+      --border:    #d8d2c5;
+      --shadow:    0 8px 32px rgba(15,25,35,0.12);
+      --radius:    16px;
+      --sans:      'Outfit', sans-serif;
+      --serif:     'Fraunces', Georgia, serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 460px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-header {
+      background: var(--ink);
+      color: #fff;
+      padding: 2rem 2rem;
+      text-align: center;
+    }
+
+    .brand-logo {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .brand-logo span { color: #5ecfc5; }
+
+    .brand-tagline {
+      font-size: 0.85rem;
+      color: #8fa4b0;
+      margin-top: 0.5rem;
+    }
+
+    .form-body {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-heading {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 0.25rem;
+      text-align: center;
+    }
+
+    .form-sub {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field select {
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: var(--paper);
+      transition: all 0.2s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--teal-lt);
+    }
+
+    .field small {
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      line-height: 1.4;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover { background: #0a6359; }
+    .btn-submit:active { transform: scale(0.99); }
+
+    .error-alert {
+      background: var(--danger-lt);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      display: none;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .footer-links {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      margin-top: 0.5rem;
+    }
+
+    .footer-links a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="register-container">
+  <header class="brand-header">
+    <div class="brand-logo">Neuro<span>Adapt</span></div>
+    <div class="brand-tagline">Early Screening & Recommendation Platform</div>
+  </header>
+
+  <form class="form-body" id="registerForm">
+    <div>
+      <h2 class="form-heading">Create Account</h2>
+      <p class="form-sub">Register as a Parent or Clinician</p>
+    </div>
+
+    <div class="error-alert" id="errorAlert"></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" required placeholder="e.g. jane_parent" minlength="3" pattern="^[a-zA-Z0-9_-]+$" />
+      <small>Only alphanumeric characters, underscores, or hyphens allowed.</small>
+    </div>
+
+    <div class="field">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" required placeholder="jane@example.com" />
+    </div>
+
+    <div class="field">
+      <label for="role">Your Role</label>
+      <select id="role" required>
+        <option value="parent">Parent / Caregiver</option>
+        <option value="clinician">Clinician / Developmental Paediatrician</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="••••••••" minlength="6" />
+      <small>Must be at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol (e.g. @, !, #, etc.).</small>
+    </div>
+
+    <button type="submit" class="btn-submit">Register Account →</button>
+
+    <div class="footer-links">
+      Already have an account? <a href="/login">Sign in here</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.getElementById("registerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const errorAlert = document.getElementById("errorAlert");
+    errorAlert.style.display = "none";
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const role = document.getElementById("role").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const response = await fetch("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, role, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors or server errors
+        let errMsg = data.detail || "Registration failed.";
+        if (Array.isArray(data.detail)) {
+          errMsg = data.detail.map(d => d.msg).join("<br>");
+        }
+        throw new Error(errMsg);
+      }
+
+      // Redirect to login page with success state
+      window.location.href = "/login?registered=1";
+    } catch (err) {
+      errorAlert.innerHTML = err.message;
+      errorAlert.style.display = "block";
+    }
+  });
+</script>
+
+</body>
+</html>
