@@ -10,31 +10,31 @@ An intelligent screening and recommendation system that helps parents and caregi
 
 The Neuro-Adaptive ASD Recommender combines machine learning, semantic matching, and generative AI to deliver:
 
-- Accurate **ASD risk prediction** using the validated **Q-CHAT-10** screening tool.
-- **Personalized app recommendations** based on the child’s specific behavioral profile.
-- **Contextual AI Chat** powered by Google Gemini for parent-friendly explanations and guidance.
+* Accurate *  *ASD risk prediction*  * using the validated *  *Q-CHAT-10* * screening tool.
+* *  *Personalized app recommendations* * based on the child's specific behavioral profile.
+* *  *Contextual AI Chat* * powered by Google Gemini for parent-friendly explanations and guidance.
 
 ---
 
 ## Key Features
 
-- Interactive Q-CHAT-10 behavioral screening
-- Real-time ASD risk prediction (XGBoost)
-- Semantic app recommendations (TF-IDF + Cosine Similarity)
-- **Google Gemini-powered contextual chat** — explains recommendations and answers parent questions
-- Modern **FastAPI** backend with RESTful endpoints
-- Responsive **Streamlit** frontend with dark mode support
-- Clean separation of concerns (FastAPI microservice + UI)
+* Interactive Q-CHAT-10 behavioral screening
+* Real-time ASD risk prediction (XGBoost)
+* Semantic app recommendations (TF-IDF + Cosine Similarity)
+* *  *Google Gemini-powered contextual chat* * — explains recommendations and answers parent questions
+* Modern *  *FastAPI* * backend with RESTful endpoints
+* Responsive *  *Streamlit* * frontend with dark mode support
+* Clean separation of concerns (FastAPI microservice + UI)
 
 ---
 
 ## Tech Stack
 
-- **Backend**: FastAPI, Uvicorn
-- **ML**: XGBoost, scikit-learn, pandas, TF-IDF + Cosine Similarity
-- **Generative AI**: Google Gemini
-- **Frontend**: Streamlit (alternative UI)
-- **Others**: Pydantic, Jinja2, Joblib
+* *  *Backend* *: FastAPI, Uvicorn
+* *  *ML* *: XGBoost, scikit-learn, pandas, TF-IDF + Cosine Similarity
+* *  *Generative AI* *: Google Gemini
+* *  *Frontend* *: Streamlit (alternative UI)
+* *  *Others* *: Pydantic, Jinja2, Joblib
 
 ---
 
@@ -65,12 +65,14 @@ neuro-adaptive-recommender/
 ## Installation & Setup
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
 cd neuro-adaptive-recommender
 ```
 
 ### 2. Create a virtual environemnt and activate
+
 ```bash
 python -m venv .venv
 ```
@@ -83,13 +85,14 @@ On Mac
 source .venv\bin\activate
 ```
 
-
 ### 2. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 3. Environment Variables
+
 Create a `.env` file in the root:
 ```env
 GEMINI_API_KEY=
@@ -97,15 +100,17 @@ GEMINI_API_KEY=
 ```
 
 ### 4. Run the FastAPI Backend
+
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn fastapi_app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Open:
-- **Web UI**: http://localhost:8000
-- **Swagger Docs**: http://localhost:8000/docs
+* *  *Web UI* *: http://localhost:8000
+* *  *Swagger Docs* *: http://localhost:8000/docs
 
 ### 5. (Optional) Run Streamlit Frontend
+
 ```bash
 streamlit run autism_streamlit_app.py
 ```
@@ -114,30 +119,30 @@ streamlit run autism_streamlit_app.py
 
 ## API Endpoints
 
-| Method | Path          | Description |
-|--------|---------------|-----------|
-| GET    | `/`           | Screening form (Web UI) |
-| POST   | `/screen`     | Submit form → render results |
-| GET    | `/health`     | System health check |
-| GET    | `/apps`       | List all cached apps |
-| POST   | `/predict`    | ASD risk probability only |
-| POST   | `/recommend`  | Risk + ranked app recommendations |
-| POST   | `/chat`       | Contextual chat with Gemini |
+| Method   | Path                      | Description                       |
+| -------- | ------------------------- | --------------------------------- |
+| GET      | `/` | Screening form (Web UI)           |
+| POST     | `/screen` | Submit form → render results      |
+| GET      | `/health` | System health check               |
+| GET      | `/apps` | List all cached apps              |
+| POST     | `/predict` | ASD risk probability only         |
+| POST     | `/recommend` | Risk + ranked app recommendations |
+| POST     | `/chat` | Contextual chat with Gemini       |
 
 ---
 
 ## Major Contributions & Updates
 
-- Migrated core logic to **FastAPI** microservice architecture
-- Added **Gemini-powered contextual chat** for personalized parent support
-- Improved dark mode support in Streamlit UI
-- Refactored into clean layered structure (`main`, `core`, `routers`)
-- Better error handling and UTF-8 support for data files
-- Enhanced model transparency with `model_card.json`
+* Migrated core logic to *  *FastAPI* * microservice architecture
+* Added *  *Gemini-powered contextual chat* * for personalized parent support
+* Improved dark mode support in Streamlit UI
+* Refactored into clean layered structure ( `main `, ` core `, ` routers` )
+* Better error handling and UTF-8 support for data files
+* Enhanced model transparency with `model_card.json`
 
 ---
 
 ## Authors & Collaborators
 
-- **Taiye Janet Fagbolade** — Data Scientist & ML Engineer
-- **Iyanu Arowosola** — ML Engineer & Full-Stack Developer
+* *  *Taiye Janet Fagbolade* * — Data Scientist & ML Engineer
+* *  *Iyanu Arowosola* * — ML Engineer & Full-Stack Developer
