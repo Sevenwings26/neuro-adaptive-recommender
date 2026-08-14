@@ -118,6 +118,11 @@ state = AppState()
 def clean_html(text: str) -> str:
     return re.sub('<[^<]+?>', '', text)
 
+def clean_nan(val: Any) -> Optional[str]:
+    if pd.isna(val) or val is None or val == "":
+        return None
+    return str(val)
+
 def map_likert_standard(val: str) -> int:
     mapping = {"Always": 0, "Usually": 1, "Sometimes": 2, "Rarely": 3, "Never": 4}
     return mapping.get(val, 1)
@@ -447,8 +452,8 @@ def recommend_books(profile_text: str, top_n: int) -> list[BookRecommendation]:
             age_range=row.get("age_range", ""),
             description=str(row.get("description", ""))[:200],
             access=row.get("access", "free"),
-            free_url=row.get("free_url") or None,
-            paid_url=row.get("paid_url") or None,
+            free_url=clean_nan(row.get("free_url")),
+            paid_url=clean_nan(row.get("paid_url")),
             cover_emoji=row.get("cover_emoji", "📖"),
             match_score=float(row["match_score"]),
         )
