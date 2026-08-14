@@ -494,7 +494,7 @@
     <span class="user-chip">User: <strong>{{ user.username }}</strong> ({{ user.role }})</span>
     {% endif %}
     <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Screening</a>
-    <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a>
+    <!-- <a href="/apps-page" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid #f6fbfbc4;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Apps</a> -->
     <button class="btn-chat-toggle" onclick="toggleChat()"><span class="dot"></span> Ask Nora AI</button>
     {% if user %}
     <button onclick="logout()" style="font-family:var(--mono);font-size:0.74rem;color:#ff6b6b;background:none;border:1px solid #ff6b6b;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;margin-left:0.25rem;">Logout</button>
@@ -520,7 +520,7 @@
 
     <p class="sidebar-desc">
       Early screening for Autism Spectrum Disorder (ASD) traits in toddlers
-      aged 12–36 months, matched to educational resources via NLP.
+      aged 12–48 months, matched to educational resources via NLP.
     </p>
 
     <div class="disclaimer">
@@ -548,7 +548,7 @@
           <div class="field">
             <label>Age (Months)</label>
             <div class="range-row">
-              <input type="range" name="age" id="ageRange" min="12" max="36" value="24"
+              <input type="range" name="age" id="ageRange" min="12" max="48" value="24"
                      oninput="document.getElementById('ageVal').textContent = this.value + ' mo'" />
               <span class="range-val" id="ageVal">24 mo</span>
             </div>

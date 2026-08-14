@@ -26,4 +26,8 @@ vercel.json
 
 /_dump 
 
-
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+recommender.db
