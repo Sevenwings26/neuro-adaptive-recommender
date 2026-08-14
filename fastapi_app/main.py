@@ -97,7 +97,7 @@ app = FastAPI(
 
 app.include_router(api_router)
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
