@@ -284,6 +284,67 @@ def build_profile_text(scores: dict[str, Any]) -> str:
     return " ".join(toddler_needs)
 
 
+async def explain_profile(
+    age: int,
+    sex_label: str,
+    risk_probability: float,
+    total_flags: int,
+    flagged_details: list,
+    profile_text: str,
+    gemini_client,
+) -> str:
+    """
+    Uses Gemini to generate a warm, parent-friendly summary of the screening
+    result — for both high and low risk outcomes.
+    """
+    if not gemini_client:
+        return ""
+
+    flagged_labels = ", ".join(
+        f"{d['code']} ({d['label']})" for d in flagged_details
+    ) or "none"
+
+    if risk_probability >= 40.0:
+        prompt = f"""
+            A {age}-month-old {sex_label} toddler was screened using the Q-CHAT-10 developmental 
+            checklist. The result shows a {risk_probability:.1f}% likelihood of ASD traits, 
+            with {total_flags} out of 10 milestones flagged: {flagged_labels}.
+            Their developmental needs profile is: "{profile_text}".
+
+            Write 2–3 warm, encouraging sentences for the parent explaining what this result 
+            means in plain everyday language. Focus on what the child may be finding 
+            challenging right now and why early support matters.
+            Do not use clinical labels or the word "autism". Be compassionate and hopeful.
+        """.strip()
+    else:
+        prompt = f"""
+            A {age}-month-old {sex_label} toddler was screened using the Q-CHAT-10 developmental 
+            checklist. The result shows a {risk_probability:.1f}% likelihood of ASD traits — 
+            a low-risk result — with {total_flags} out of 10 milestones flagged: {flagged_labels or "none"}.
+
+            Write 2–3 warm, reassuring sentences for the parent explaining what this result 
+            means in plain everyday language. Acknowledge any milestones that were flagged 
+            if any exist, but frame the overall result positively. 
+            Recommend routine monitoring and continued engagement.
+            Do not use clinical labels. Be warm and encouraging.
+        """.strip()
+
+    try:
+        response = gemini_client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[{"role": "user", "parts": [{"text": prompt}]}],
+        )
+        return response.text.strip() or ""
+    except Exception as e:
+        log.warning(f"Profile Explanation failed: {e}")
+        # Safe fallback
+        return (
+            f"Your child may benefit from extra support in areas such as "
+            f"communication, eye contact, or sensory regulation. "
+            f"Early help can make a big difference."
+        )
+
+
 def predict_risk(scores: dict[str, Any]) -> float:
     """Maps Likert inputs to 0-4 values and runs prediction on the lean XGBoost model."""
     a1 = map_likert_standard(scores.get("A1", "Usually"))

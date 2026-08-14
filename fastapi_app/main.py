@@ -1,4 +1,11 @@
 # main.py
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, Form, Request, Depends
@@ -8,8 +15,6 @@ import json
 import time 
 import traceback
 import os
-from dotenv import load_dotenv
-import sys
 from typing import Optional
 from sqlalchemy.orm import Session
 
