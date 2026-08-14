@@ -18,12 +18,21 @@ from services.auth_service import AuthService
 from repositories.user_repository import UserRepository
 from models.auth_models import User
 from core import (
-    state, _load_model, _load_app_cache, _init_gemini, 
-    predict_risk, recommend_apps, build_profile_text, explain_profile, QUESTION_LABELS, log
+    state, _load_model, _load_app_cache, _load_book_cache, _init_gemini, 
+    predict_risk, recommend_apps, recommend_books,
+    map_likert_standard, map_likert_reverse,
+    build_profile_text, explain_profile, QUESTION_LABELS, log
 )
 from routers import api_router
 import models.auth_models
 from database import engine, Base
+
+
+def check_flag(k: str, val: str) -> bool:
+    if k in ["A9", "A10"]:
+        return map_likert_reverse(val) >= 3
+    else:
+        return map_likert_standard(val) >= 3
 
 
 @asynccontextmanager
@@ -47,13 +56,14 @@ async def lifespan(app: FastAPI):
         _load_app_cache()
         log.info(f"✓ App cache loaded — {len(state.df_apps)} apps")
 
+        _load_book_cache()
+        log.info(f"✓ Book cache loaded — {len(state.df_books)} books")
+
         _init_gemini()
         
         # Better API Key logging (without exposing the key)
         api_key = os.getenv("GEMINI_API_KEY")
         if api_key:
-            # masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
-            # log.info(f"✓ GEMINI_API_KEY loaded successfully ({masked_key})")
             log.info(f"✓ GEMINI_API_KEY loaded successfully")
         else:
             log.warning("⚠️ GEMINI_API_KEY is missing — Chat feature will be disabled")
@@ -134,6 +144,7 @@ def index(request: Request, user: Optional[User] = Depends(get_current_user_from
             "user"          : user,
             "model_card"    : state.model_card,
             "apps_count"    : len(state.df_apps),
+            "books_count"   : len(state.df_books),
             "chat_available": state.gemini_client is not None,  
         },
     )
@@ -143,10 +154,10 @@ def index(request: Request, user: Optional[User] = Depends(get_current_user_from
 async def screen(
     request: Request,
     age: int = Form(...), sex: int = Form(...),
-    A1: int = Form(...), A2: int = Form(...), A3: int = Form(...),
-    A4: int = Form(...), A5: int = Form(...), A6: int = Form(...),
-    A7: int = Form(...), A8: int = Form(...), A9: int = Form(...),
-    A10: int = Form(...),
+    A1: str = Form(...), A2: str = Form(...), A3: str = Form(...),
+    A4: str = Form(...), A5: str = Form(...), A6: str = Form(...),
+    A7: str = Form(...), A8: str = Form(...), A9: str = Form(...),
+    A10: str = Form(...),
     top_n: int = Form(3),
     user: Optional[User] = Depends(get_current_user_from_cookie),
 ):
@@ -159,19 +170,21 @@ async def screen(
         scores = {
             "A1": A1, "A2": A2, "A3": A3, "A4": A4, "A5": A5,
             "A6": A6, "A7": A7, "A8": A8, "A9": A9, "A10": A10,
-            "Sex": sex,
+            "Age": age, "Sex": sex,
         }
     
         risk = predict_risk(scores)
-        high_risk = risk >= 50.0   # Threshold for high risk  
-        total_flags = sum(v for k, v in scores.items() if k.startswith("A"))
-        profile_text = build_profile_text(scores) if high_risk else ""
-        app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
-
+        high_risk = risk >= 40.0   # Threshold for high risk is 40%
+        
         flagged_details = [
             {"code": k, "label": QUESTION_LABELS[k]}
-            for k in QUESTION_LABELS if scores.get(k, 0) == 1
+            for k in QUESTION_LABELS if check_flag(k, scores.get(k))
         ]
+        total_flags = len(flagged_details)
+        
+        profile_text = build_profile_text(scores) if high_risk else ""
+        app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
+        book_recs    = recommend_books(profile_text, top_n) if high_risk else []
 
         profile_explained = ""
         if state.gemini_client:
@@ -188,6 +201,8 @@ async def screen(
             except Exception as e:
                 log.error("explain_profile crashed: %s", e)
                 profile_explained = "We recommend focusing on communication and social engagement activities."
+        else:
+            profile_explained = "We recommend focusing on communication and social engagement activities."
 
         screening_context = {
             "age": age,
@@ -196,6 +211,7 @@ async def screen(
             "total_flags": total_flags,
             "flagged_questions": [f"{d['code']}: {d['label']}" for d in flagged_details],
             "recommended_apps": [r.app_name for r in app_recs],
+            "recommended_books": [r.title for r in book_recs],
             "profile_text": profile_text,
             "profile_explained": profile_explained, # human-readable — shown in UI
         }
@@ -214,6 +230,7 @@ async def screen(
                 "profile_text": profile_text,
                 "profile_explained": profile_explained,
                 "recommendations": app_recs,
+                "book_recommendations": book_recs,
                 "model_card": state.model_card,
                 "screening_context": json.dumps(screening_context),
                 "chat_available": state.gemini_client is not None,

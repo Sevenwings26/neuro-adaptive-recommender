@@ -8,13 +8,21 @@ from schemas.recommend import (
     ChatRequest, ChatResponse,
 )
 from core import (
-    state, predict_risk, recommend_apps,
+    state, predict_risk, recommend_apps, recommend_books,
+    map_likert_standard, map_likert_reverse,
     build_profile_text, QUESTION_LABELS, CHAT_SYSTEM_PROMPT, GEMINI_MODEL, log
 )
 from services.auth_service import get_current_user, RoleChecker
 from models.auth_models import User
 
 recommend_router = APIRouter()
+
+
+def check_flag(k: str, val: str) -> bool:
+    if k in ["A9", "A10"]:
+        return map_likert_reverse(val) >= 3
+    else:
+        return map_likert_standard(val) >= 3
 
 
 @recommend_router.get("/health", response_model=HealthResponse, tags=["System"])
@@ -25,8 +33,11 @@ def health():
         model_type    = state.model_card.get("model_type", "unknown"),
         test_accuracy = state.model_card.get("test_accuracy", 0),
         test_roc_auc  = state.model_card.get("test_roc_auc", 0),
-        feature_cols  = state.feature_cols,
+        feature_cols  = ['qchat6recode', 'qchat2recode', 'qchat5recode', 'qchat4recode',
+                         'qchat10recode', 'qchat15recode', 'qchat25recode', 'qchat11recode',
+                         'qchat1recode', 'qchat17recode', 'age', 'sex'],
         apps_in_cache = len(state.df_apps),
+        books_in_cache= len(state.df_books),
         uptime_seconds= round(time.time() - state.startup_time, 1),
     )
 
@@ -59,11 +70,11 @@ def predict(
     flagged = [
         f"{k}: {QUESTION_LABELS[k]}"
         for k in QUESTION_LABELS
-        if scores.get(k, 0) == 1
+        if check_flag(k, scores.get(k))
     ]
     return PredictResponse(
         risk_probability  = round(risk, 2),
-        high_risk         = risk >= 50.0,
+        high_risk         = risk >= 40.0,
         total_flags       = len(flagged),
         flagged_questions = flagged,
         latency_ms        = round((time.time() - t0) * 1000, 1),
@@ -78,33 +89,41 @@ def recommend(
     t0          = time.time()
     scores      = request.model_dump(exclude={"top_n"})
     risk        = predict_risk(scores)
-    total_flags = sum(v for k, v in scores.items() if k.startswith("A"))
+    flagged = [
+        f"{k}: {QUESTION_LABELS[k]}"
+        for k in QUESTION_LABELS
+        if check_flag(k, scores.get(k))
+    ]
+    total_flags = len(flagged)
 
-    if risk < 50.0:
+    if risk < 40.0:
         return RecommendResponse(
-            risk_probability = round(risk, 2),
-            high_risk        = False,
-            total_flags      = total_flags,
-            profile_text     = "",
-            recommendations  = [],
-            message          = "Low likelihood of ASD traits. Standard monitoring recommended.",
-            latency_ms       = round((time.time() - t0) * 1000, 1),
+            risk_probability     = round(risk, 2),
+            high_risk            = False,
+            total_flags          = total_flags,
+            profile_text         = "",
+            recommendations      = [],
+            book_recommendations = [],
+            message              = "Low likelihood of ASD traits. Standard monitoring recommended.",
+            latency_ms           = round((time.time() - t0) * 1000, 1),
         )
 
     profile_text = build_profile_text(scores)
     app_recs     = recommend_apps(profile_text, request.top_n)
+    book_recs    = recommend_books(profile_text, request.top_n)
 
     return RecommendResponse(
-        risk_probability = round(risk, 2),
-        high_risk        = True,
-        total_flags      = total_flags,
-        profile_text     = profile_text,
-        recommendations  = app_recs,
-        message          = (
+        risk_probability     = round(risk, 2),
+        high_risk            = True,
+        total_flags          = total_flags,
+        profile_text         = profile_text,
+        recommendations      = app_recs,
+        book_recommendations = book_recs,
+        message              = (
             f"High likelihood of ASD traits detected ({risk:.1f}%). "
             "Early intervention is recommended. Please consult a developmental paediatrician."
         ),
-        latency_ms       = round((time.time() - t0) * 1000, 1),
+        latency_ms           = round((time.time() - t0) * 1000, 1),
     )
 
 

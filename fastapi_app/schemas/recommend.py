@@ -9,8 +9,10 @@ Having schemas in a separate file means:
   - The Streamlit app can import them too for type-safe calls
 """
 
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import BaseModel, Field, field_validator
+
+LikertScale = Literal["Always", "Usually", "Sometimes", "Rarely", "Never"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -30,37 +32,30 @@ def _binary(v: int) -> int:
 class BehavioralProfile(BaseModel):
     """
     Q-CHAT-10 behavioral screening profile for a toddler.
-
-    All A-fields are binary:
-      0 = typical milestone met
-      1 = milestone delayed / not observed
-
-    Sex: 1 = Male, 0 = Female
+    Accepts 5-point Likert scale responses: Always, Usually, Sometimes, Rarely, Never.
+    Age: Child's age in months (12-48).
+    Sex: 1 = Male, 0 = Female.
     """
 
-    A1  : int = Field(..., ge=0, le=1, description="Responds to name when called")
-    A2  : int = Field(..., ge=0, le=1, description="Makes eye contact")
-    A3  : int = Field(..., ge=0, le=1, description="Points to indicate wants")
-    A4  : int = Field(..., ge=0, le=1, description="Points to share interest")
-    A5  : int = Field(..., ge=0, le=1, description="Engages in pretend play")
-    A6  : int = Field(..., ge=0, le=1, description="Follows gaze / pointing")
-    A7  : int = Field(..., ge=0, le=1, description="Uses basic words or speech")
-    A8  : int = Field(..., ge=0, le=1, description="Understands simple gestures")
-    A9  : int = Field(..., ge=0, le=1, description="Unusual sensory reactions (1 = present)")
-    A10 : int = Field(..., ge=0, le=1, description="Repetitive or unusual behaviours (1 = present)")
+    A1  : LikertScale = Field(..., description="Looks at you when called?")
+    A2  : LikertScale = Field(..., description="Makes eye contact easily?")
+    A3  : LikertScale = Field(..., description="Points to indicate wants?")
+    A4  : LikertScale = Field(..., description="Points to share interest?")
+    A5  : LikertScale = Field(..., description="Engages in pretend play?")
+    A6  : LikertScale = Field(..., description="Follows where you look?")
+    A7  : LikertScale = Field(..., description="Speaks basic words?")
+    A8  : LikertScale = Field(..., description="Understands simple gestures?")
+    A9  : LikertScale = Field(..., description="Unusual sensory reactions (e.g. staring at nothing)?")
+    A10 : LikertScale = Field(..., description="Repetitive behaviors (e.g. hand flapping)?")
+    Age : int = Field(..., ge=12, le=48, description="Child's age in months (12–48)")
     Sex : int = Field(..., ge=0, le=1, description="Biological sex: 1 = Male, 0 = Female")
-
-    @field_validator("A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","Sex")
-    @classmethod
-    def must_be_binary(cls, v: int) -> int:
-        return _binary(v)
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "A1": 1, "A2": 0, "A3": 1, "A4": 1, "A5": 0,
-                "A6": 1, "A7": 1, "A8": 0, "A9": 1, "A10": 1,
-                "Sex": 1,
+                "A1": "Usually", "A2": "Usually", "A3": "Usually", "A4": "Usually", "A5": "Usually",
+                "A6": "Usually", "A7": "Usually", "A8": "Usually", "A9": "Never", "A10": "Never",
+                "Age": 24, "Sex": 1,
             }
         }
     }
@@ -83,9 +78,9 @@ class RecommendRequest(BehavioralProfile):
     model_config = {
         "json_schema_extra": {
             "example": {
-                "A1": 1, "A2": 1, "A3": 1, "A4": 1, "A5": 1,
-                "A6": 1, "A7": 1, "A8": 1, "A9": 1, "A10": 1,
-                "Sex": 1,
+                "A1": "Usually", "A2": "Usually", "A3": "Usually", "A4": "Usually", "A5": "Usually",
+                "A6": "Usually", "A7": "Usually", "A8": "Usually", "A9": "Never", "A10": "Never",
+                "Age": 24, "Sex": 1,
                 "top_n": 3,
             }
         }

@@ -453,7 +453,7 @@
   <!-- Disclaimer -->
   <div class="disclaimer">
     ⚠️ <strong>Screening aid only.</strong> This result does not constitute a clinical diagnosis.
-    A probability above 50% indicates a professional evaluation is warranted — not that the child has ASD.
+    A probability above 40% indicates a professional evaluation is warranted — not that the child has ASD.
   </div>
 
   <!-- Flagged milestones -->
@@ -504,6 +504,42 @@
       {% else %}
       <p style="color:var(--ink-soft);font-size:0.87rem;padding:1rem 0;">
         No app recommendations available — check that <code>app_cache.json</code> exists.
+      </p>
+      {% endfor %}
+    </div>
+
+    <!-- ── Book Recommendations ────────────────────────────── -->
+    <div class="sec-head" style="margin-top:2rem;">📖 Recommended Books & Guides</div>
+    <div class="rec-list">
+      {% for rec in book_recommendations %}
+      <div class="rec-card card" style="animation-delay:{{ (loop.index + 3) * 0.07 }}s">
+        <div class="rec-rank" style="font-size:1.5rem;">{{ rec.cover_emoji }}</div>
+        <div style="flex-grow:1;">
+          <div class="rec-name">
+            {% if rec.access == 'free' and rec.free_url %}
+              <a href="{{ rec.free_url }}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--teal);">{{ rec.title }}</a>
+            {% elif rec.access == 'paid' and rec.paid_url %}
+              <a href="{{ rec.paid_url }}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--teal);">{{ rec.title }}</a>
+            {% else %}
+              {{ rec.title }}
+            {% endif %}
+          </div>
+          <div class="rec-meta">
+            <span>By {{ rec.author }}</span>
+            <span>Category: {{ rec.category }}</span>
+            <span>Age: {{ rec.age_range }}</span>
+            <span class="badge" style="background:rgba(94, 207, 197, 0.15);color:#5ecfc5;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.68rem;text-transform:uppercase;margin-left:0.25rem;">{{ rec.access }}</span>
+          </div>
+          <div class="rec-desc" style="margin-top:0.4rem;">{{ rec.description }}</div>
+        </div>
+        <div class="match-badge">
+          <span class="match-pct">{{ rec.match_score }}%</span>
+          <span class="match-lbl">MATCH</span>
+        </div>
+      </div>
+      {% else %}
+      <p style="color:var(--ink-soft);font-size:0.87rem;padding:1rem 0;">
+        No book recommendations available.
       </p>
       {% endfor %}
     </div>

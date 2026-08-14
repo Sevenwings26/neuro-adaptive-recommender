@@ -353,44 +353,29 @@
       transition: width 0.3s ease;
     }
 
-    /* ── Radio buttons ────────────────────────────────────────── */
-.radio-wrap {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.radio-opt {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 500;
-  transition: all 0.15s;
-  background: var(--paper);
-  color: var(--ink-soft);
-  user-select: none;
-}
-
-.radio-opt input[type="radio"] {
-  display: none; /* hide the raw radio, style the label */
-}
-
-.radio-opt.yes-opt:has(input:checked) {
-  background: var(--teal-lt);
-  border-color: var(--teal);
-  color: var(--teal);
-}
-
-.radio-opt.no-opt:has(input:checked) {
-  background: var(--danger-lt, #fdecea);
-  border-color: var(--danger, #c0392b);
-  color: var(--danger, #c0392b);
-}
+    /* ── Select Dropdowns ────────────────────────────────────────── */
+    .select-wrap {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .q-select {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 130px;
+    }
+    .q-select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 5px rgba(94, 207, 197, 0.3);
+    }
 
     /* ── Topbar ──────────────────────────────────────────────────── */
     .topbar {
@@ -606,15 +591,14 @@
               {{ question }}
               <small>{{ hint }}</small>
             </div>
-            <div class="radio-wrap">
-              <label class="radio-opt yes-opt">
-                <input type="radio" name="{{ code }}" value="0" checked />
-                <span>Yes</span>
-              </label>
-              <label class="radio-opt no-opt">
-                <input type="radio" name="{{ code }}" value="1" />
-                <span>No</span>
-              </label>
+            <div class="select-wrap">
+              <select name="{{ code }}" class="q-select">
+                <option value="Always">Always</option>
+                <option value="Usually" selected>Usually</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Never">Never</option>
+              </select>
             </div>
           </div>
           {% endfor %}
@@ -634,15 +618,14 @@
               {{ question }}
               <small>{{ hint }}</small>
             </div>
-            <div class="radio-wrap">
-              <label class="radio-opt yes-opt">
-                <input type="radio" name="{{ code }}" value="1" checked />
-                <span>Yes</span>
-              </label>
-              <label class="radio-opt no-opt">
-                <input type="radio" name="{{ code }}" value="0" />
-                <span>No</span>
-              </label>
+            <div class="select-wrap">
+              <select name="{{ code }}" class="q-select">
+                <option value="Never" selected>Never</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Usually">Usually</option>
+                <option value="Always">Always</option>
+              </select>
             </div>
           </div>
           {% endfor %}
@@ -675,24 +658,6 @@
 
 <script>
 
-  // ── Progress bar — counts rows where No is selected ──────────
-  function updateProgress() {
-    const total   = document.querySelectorAll('.q-row').length;
-    const answered = document.querySelectorAll('.q-row input[type="radio"]:checked').length;
-    // Each row has 2 radios, one always checked (default), so
-    // track changes from default instead
-    const changed = document.querySelectorAll(
-      '.q-row .no-opt input:checked, .q-row .yes-opt:not(:first-of-type) input:checked'
-    ).length;
-    const pct = Math.round((changed / total) * 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-  }
-
-  document.querySelectorAll('.radio-opt input').forEach(el => {
-    el.addEventListener('change', updateProgress);
-  });
-
-
   // ── Top-N picker ──────────────────────────────────────────────────
   function setTopN(n) {
     document.getElementById('topNVal').value = n;
@@ -701,11 +666,11 @@
     });
   }
 
-  // ── Progress bar (counts how many toggles have been touched) ──────
+  // ── Progress bar (counts how many select inputs have been changed) ──
   let touched = new Set();
-  document.querySelectorAll('.q-toggle, .q-toggle-inv').forEach(el => {
+  document.querySelectorAll('.q-select').forEach(el => {
     el.addEventListener('change', () => {
-      touched.add(el.dataset.field);
+      touched.add(el.name);
       updateProgress();
     });
   });
