@@ -1,4 +1,5 @@
 import re
+import os
 
 def clean_html(text):
     return re.sub('<[^<]+?>', '', text)
@@ -11,6 +12,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from google import genai
 import time
+from dotenv import load_dotenv
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 
 # =========================================================
 # 1. PAGE CONFIGURATION & API SETUP
@@ -18,7 +24,7 @@ import time
 st.set_page_config(page_title="Neuro-Adapt Learning Recommender", page_icon="🧠", layout="wide")
 
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
+    api_key = GEMINI_API_KEY
     client = genai.Client(api_key=api_key)
 except Exception as e:
     st.error("Google API Key not found. Please configure Streamlit Secrets.")
@@ -112,94 +118,6 @@ if risk_prob_raw < CHOSEN_THRESHOLD:
     st.write("The child is currently meeting standard developmental milestones. Routine monitoring is recommended.")
 else:
     st.error(f"⚠️ **High Likelihood of ASD Traits Detected ({risk_prob:.1f}%)**")
-
-#if st.button("Analyze Profile & Generate Plan", type="primary", use_container_width=True):
-    
-    # --- A. Predict ASD Risk ---
-    #try:
-        #risk_prob = model.predict_proba(input_data)[0][1] * 100
-    #except ValueError as e:
-        #st.error(f"Prediction Error: Feature mismatch. Please ensure input columns match model training. {e}")
-        #st.stop()
-        
-    #if risk_prob < 50:
-        #st.success(f"✅ **Low Likelihood of ASD Traits ({risk_prob:.1f}%)**")
-        #st.write("The child is currently meeting standard developmental milestones. Routine monitoring is recommended.")
-    #else:
-        #st.error(f"⚠️ **High Likelihood of ASD Traits Detected ({risk_prob:.1f}%)**")
-        
-        # --- B. Live Web Scraping (Finding Apps) ---
-        #with st.spinner("Scraping live educational apps from the Play Store..."):
-            #search_results = search("autism speech therapy special education", lang="en", country="us")
-            #top_apps = search_results[:12] 
-            
-            #app_data = []
-            #for result in top_apps:
-                #try:
-                    #app_details = app(result['appId'], lang='en', country='us')
-                    #if app_details['genre'] in ['Education', 'Medical', 'Parenting']:
-                        #app_data.append({
-                            #'App_Name': app_details['title'],
-                            #'Category': app_details['genre'],
-                            #'Rating': round(app_details.get('score', 0), 2),
-                            #'Price': "Free" if app_details.get('free') else "Paid",
-                            #'Description': app_details['description'][:600],
-                            #'App_Link': app_details['url']
-                       # })
-                #except:
-                    #continue
-            #df_apps = pd.DataFrame(app_data)
-        
-        # --- C. NLP Recommendation (TF-IDF Matching) ---
-        #with st.spinner("Matching apps to the child's specific behavioral needs..."):
-            #toddler_needs = []
-            
-            # NLP LOGIC UPGRADE: Only trigger if the deficit score is high (3 or 4)
-            #if a1 >= 3 or a7 >= 3: toddler_needs.append("speech delay non-verbal communication talk words articulation")
-            #if a3 >= 3 or a4 >= 3 or a6 >= 3: toddler_needs.append("social interaction play cognitive learning pointing joint attention")
-            #if a9 >= 3 or a10 >= 3: toddler_needs.append("sensory meltdowns routine calm visual behavior ADHD")
-            #if not toddler_needs: toddler_needs.append("autism special education cognitive skills")
-            
-            #toddler_profile_text = " ".join(toddler_needs)
-            
-            # = TfidfVectorizer(stop_words='english')
-            #tfidf_matrix = tfidf.fit_transform(df_apps['Description'].fillna("").tolist())
-            # = tfidf.transform([toddler_profile_text])
-            
-            #similarity_scores = cosine_similarity(toddler_vector, tfidf_matrix).flatten()
-            #df_apps['Match_Score'] = (similarity_scores * 100).round(1)
-            
-            #best_apps = df_apps[df_apps['Match_Score'] > 0].sort_values(by='Match_Score', ascending=False).head(3)
-            #recommended_app_names = best_apps['App_Name'].tolist()
-
-        # --- D. The LLM Agent (Personalizing the Output) ---
-        #with st.spinner("Generating empathetic intervention plan via LLM Agent..."):
-            #system_prompt = f"""
-           # You are a compassionate, expert special education consultant. 
-           # A parent's {age}-month-old toddler was just screened with a {risk_prob:.1f}% likelihood of ASD traits.
-            #The child struggles with: {toddler_profile_text}.
-            #Our system recommends these 3 apps: {recommended_app_names}.
-            
-           # Write a highly empathetic, encouraging message to the parent. Explain gently why early intervention matters, and briefly explain how those 3 apps will help their child's specific needs. Do not provide medical diagnosis. Maximum 200 words.
-            #"""
-
-            #try:
-                #response = client.models.generate_content(
-                    #model='gemini-1.5-flash-latest', 
-                    #contents=system_prompt
-                #)
-                #st.markdown("### 🤖 Your Personalized Agent Analysis")
-                #st.info(response.text)
-           # except Exception as e:
-                #st.warning(f"LLM Agent unavailable: {e}")
-
-        # --- E. Display the Recommended Apps UI (With Clickable Links) ---
-        #st.markdown("### 📱 Recommended Live Resources")
-        #for _, row in best_apps.iterrows():
-            #with st.container():
-                #st.markdown(f"#### ⭐ [{row['App_Name']}]({row['App_Link']}) (Match: {row['Match_Score']}%)")
-                #st.caption(f"Category: {row['Category']} | Rating: {row['Rating']}⭐ | Price: {row['Price']}")
-                #st.write(f"_{row['Description'][:150]}..._")
 
     # --- B. Live Web Scraping (Finding Apps) ---
     with st.spinner("Scraping live educational apps from the Play Store..."):
