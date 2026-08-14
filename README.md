@@ -70,6 +70,20 @@ git clone https://github.com/Sevenwings26/neuro-adaptive-recommender.git
 cd neuro-adaptive-recommender
 ```
 
+### 2. Create a virtual environemnt and activate
+```bash
+python -m venv .venv
+```
+On windows
+```
+.venv\scripts\activate
+```
+On Mac
+```
+source .venv\bin\activate
+```
+
+
 ### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
@@ -79,6 +93,7 @@ pip install -r requirements.txt
 Create a `.env` file in the root:
 ```env
 GEMINI_API_KEY=
+
 ```
 
 ### 4. Run the FastAPI Backend
