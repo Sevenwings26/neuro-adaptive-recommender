@@ -516,6 +516,7 @@
         <a href="/" class="nav-link">Screening</a>
         <a href="/journey/{{ child.id }}" class="nav-link active">Journey Loop</a>
         <a href="/schedule/{{ child.id }}" class="nav-link">Visual Schedules</a>
+    <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
         <a href="/meltdown/{{ child.id }}/active" class="nav-link" style="color:#ff6b6b;font-weight:600;">🚨 Meltdowns</a>
         <a href="/apps-page" class="nav-link">Apps</a>
         {% if user and user.role == 'clinician' %}
@@ -791,6 +792,7 @@
         <div class="form-group">
           <label>Date of Birth</label>
           <input type="date" id="childDOB" required />
+          <small style="display:block;color:var(--teal);font-size:0.75rem;margin-top:0.3rem;">Target range: 12–48 months old (1–4 years)</small>
         </div>
         <div class="form-group">
           <label>Biological Sex</label>
@@ -834,6 +836,13 @@
       const first_name = document.getElementById('childFirstName').value;
       const date_of_birth = document.getElementById('childDOB').value;
       const biological_sex = parseInt(document.getElementById('childSex').value);
+
+      const dobDate = new Date(date_of_birth);
+      const diffMonths = Math.round((new Date() - dobDate) / (1000 * 60 * 60 * 24 * 30.44));
+      if (diffMonths < 12 || diffMonths > 48) {
+        alert(`NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old).\n\nThe selected birth date corresponds to approximately ${diffMonths} months.`);
+        return;
+      }
 
       try {
         const res = await fetch('/api/v1/children', {

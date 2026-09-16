@@ -27,3 +27,6 @@ class User(Base):
     reminders = relationship("ReminderNotification", back_populates="user", cascade="all, delete-orphan")
     assigned_patients = relationship("ClinicianPatientAssignment", back_populates="clinician", cascade="all, delete-orphan")
     clinical_notes = relationship("ClinicalNote", back_populates="clinician", cascade="all, delete-orphan")
+    community_posts = relationship("CommunityPost", back_populates="author", cascade="all, delete-orphan")
+    community_replies = relationship("CommunityReply", foreign_keys="CommunityReply.author_id", back_populates="author", cascade="all, delete-orphan")
+    submitted_resources = relationship("LocalResource", back_populates="submitted_by", cascade="all, delete-orphan")

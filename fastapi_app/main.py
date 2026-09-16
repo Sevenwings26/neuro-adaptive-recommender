@@ -20,7 +20,9 @@ from uuid import UUID
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 
-from database import get_db, engine, Base
+from database import get_db, engine, Base, SessionLocal
+from services.community_service import CommunityService
+from services.local_resource_service import LocalResourceService
 from services.auth_service import AuthService
 from repositories.user_repository import UserRepository
 import models
@@ -85,6 +87,14 @@ async def lifespan(app: FastAPI):
             log.info("✓ GEMINI_API_KEY loaded successfully")
         else:
             log.warning("⚠️ GEMINI_API_KEY is missing — Chat feature will be disabled")
+
+        # Seed default community circles and local resources
+        try:
+            with SessionLocal() as seed_db:
+                CommunityService.seed_default_circles(seed_db)
+                LocalResourceService.seed_default_resources(seed_db)
+        except Exception as seed_err:
+            log.warning(f"⚠️ Community seed warning: {seed_err}")
 
         # Start automated 30-day reassessment scheduler
         start_scheduler()
@@ -233,9 +243,16 @@ async def screen(
         ]
         total_flags = len(flagged_details)
         
-        profile_text = build_profile_text(scores) if high_risk else ""
-        app_recs     = recommend_apps(profile_text, top_n) if high_risk else []
-        book_recs    = recommend_books(profile_text, top_n) if high_risk else []
+        # Sanitize top_n to default to 3 if missing or invalid
+        effective_top_n = max(1, min(5, int(top_n or 3)))
+
+        if high_risk:
+            profile_text = build_profile_text(scores)
+        else:
+            profile_text = "early childhood developmental milestones, social communication play, curiosity, and language enrichment"
+
+        app_recs  = recommend_apps(profile_text, effective_top_n)
+        book_recs = recommend_books(profile_text, effective_top_n)
 
         profile_explained = ""
         if state.gemini_client:
@@ -272,7 +289,7 @@ async def screen(
                 child = db.query(ChildProfile).filter(ChildProfile.user_id == user.id).order_by(ChildProfile.created_at.asc()).first()
 
             if not child:
-                approx_dob = (datetime.now(timezone.utc) - timedelta(days=int(age * 30.44))).date()
+                approx_dob = (datetime.now(timezone.utc) - timedelta(days=int(round(age * 30.4375)))).date()
                 child = ChildProfile(
                     user_id=user.id,
                     first_name=f"{user.username}'s Child",
@@ -287,10 +304,15 @@ async def screen(
                 child.biological_sex = sex
                 db.commit()
 
-            # 2. Persist ScreeningAssessment
+            # 2. Persist ScreeningAssessment (anchor age_months to child's date_of_birth if available)
+            if child and child.date_of_birth:
+                screening_age = max(1, int(round((datetime.now(timezone.utc).date() - child.date_of_birth).days / 30.4375)))
+            else:
+                screening_age = age
+
             assessment = ScreeningAssessment(
                 child_id=child.id,
-                age_months=age,
+                age_months=screening_age,
                 a1_score=map_likert_standard(A1),
                 a2_score=map_likert_standard(A2),
                 a3_score=map_likert_standard(A3),
@@ -348,6 +370,7 @@ async def screen(
             "recommended_books": [r.title for r in book_recs],
             "profile_text": profile_text,
             "profile_explained": profile_explained,
+            "screened": True,
         }
 
         return templates.TemplateResponse(
@@ -749,6 +772,50 @@ def evidence_explorer_view(
         context={
             "user": user,
             "evidence_items": evidence_items,
+            "chat_available": state.gemini_client is not None,
+        }
+    )
+
+
+
+@app.get("/community", response_class=HTMLResponse, tags=["UI"])
+def community_hub_view(
+    request: Request,
+    circle: Optional[str] = None,
+    user: Optional[User] = Depends(get_current_user_from_cookie),
+    db: Session = Depends(get_db)
+):
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+
+    all_children = db.query(ChildProfile).filter(ChildProfile.user_id == user.id).all()
+    active_child = all_children[0] if all_children else None
+
+    circles = CommunityService.get_circles(db)
+    selected_circle = None
+    if circle:
+        selected_circle = next((c for c in circles if c.slug == circle), None)
+
+    posts = CommunityService.list_posts(
+        db=db,
+        current_user=user,
+        circle_slug=circle if selected_circle else None,
+        limit=50
+    )
+
+    resources = LocalResourceService.list_resources(db=db, current_user=user, limit=20)
+
+    return templates.TemplateResponse(
+        request,
+        "community.html",
+        context={
+            "user": user,
+            "all_children": all_children,
+            "active_child": active_child,
+            "circles": circles,
+            "selected_circle": selected_circle,
+            "posts": posts,
+            "resources": resources,
             "chat_available": state.gemini_client is not None,
         }
     )

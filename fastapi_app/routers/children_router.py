@@ -57,6 +57,12 @@ def list_children(current_user: User = Depends(get_current_user), db: Session = 
 @children_router.post("", response_model=ChildResponse, status_code=status.HTTP_201_CREATED)
 def create_child(child_in: ChildCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Register a new child profile."""
+    age_months = compute_age_months(child_in.date_of_birth)
+    if age_months < 12 or age_months > 48:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old). Provided date of birth corresponds to {age_months} months."
+        )
     child = ChildProfile(
         user_id=current_user.id,
         first_name=child_in.first_name.strip(),
@@ -104,6 +110,12 @@ def update_child(child_id: UUID, child_update: ChildUpdate, current_user: User =
     if child_update.first_name is not None:
         child.first_name = child_update.first_name.strip()
     if child_update.date_of_birth is not None:
+        age_months = compute_age_months(child_update.date_of_birth)
+        if age_months < 12 or age_months > 48:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old). Provided date of birth corresponds to {age_months} months."
+            )
         child.date_of_birth = child_update.date_of_birth
     if child_update.biological_sex is not None:
         child.biological_sex = child_update.biological_sex

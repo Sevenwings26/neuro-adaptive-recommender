@@ -207,14 +207,16 @@ class ScreeningContext(BaseModel):
     Snapshot of the child's screening result — sent with every chat message
     so Gemini always has personalised context without server-side session state.
     """
-    age               : int
-    sex_label         : str
-    risk_probability  : float
-    total_flags       : int
-    flagged_questions : list[str]
+    age               : int         = 0
+    sex_label         : str         = "Unknown"
+    risk_probability  : float       = 0.0
+    total_flags       : int         = 0
+    flagged_questions : list[str]   = Field(default_factory=list)
     recommended_apps  : list[str]   = Field(default_factory=list)
     recommended_books : list[str]   = Field(default_factory=list)
     profile_text      : str         = ""
+    profile_explained : str         = ""
+    screened          : bool        = False
 
 
 class ChatMessage(BaseModel):

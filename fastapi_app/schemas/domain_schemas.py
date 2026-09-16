@@ -1,8 +1,8 @@
 ﻿# domain_schemas.py
-from datetime import datetime, date, time as time_type
+from datetime import datetime, date, timezone, time as time_type
 from typing import Optional, List, Dict, Any
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 # ─────────────────────────────────────────────────────────────
@@ -14,11 +14,41 @@ class ChildCreate(BaseModel):
     date_of_birth: date = Field(..., description="Child date of birth (YYYY-MM-DD)")
     biological_sex: int = Field(..., ge=0, le=1, description="1 = Male, 0 = Female")
 
+    @field_validator("date_of_birth")
+    @classmethod
+    def validate_toddler_age(cls, v: date) -> date:
+        today = datetime.now(timezone.utc).date()
+        if v > today:
+            raise ValueError("Date of birth cannot be in the future.")
+        days = (today - v).days
+        age_months = max(1, int(days / 30.44))
+        if age_months < 12 or age_months > 48:
+            raise ValueError(
+                f"NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old). Provided date of birth corresponds to {age_months} months."
+            )
+        return v
+
 
 class ChildUpdate(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=50)
     date_of_birth: Optional[date] = None
     biological_sex: Optional[int] = Field(None, ge=0, le=1)
+
+    @field_validator("date_of_birth")
+    @classmethod
+    def validate_toddler_age(cls, v: Optional[date]) -> Optional[date]:
+        if v is None:
+            return v
+        today = datetime.now(timezone.utc).date()
+        if v > today:
+            raise ValueError("Date of birth cannot be in the future.")
+        days = (today - v).days
+        age_months = max(1, int(days / 30.44))
+        if age_months < 12 or age_months > 48:
+            raise ValueError(
+                f"NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old). Provided date of birth corresponds to {age_months} months."
+            )
+        return v
 
 
 class ChildResponse(BaseModel):

@@ -12,6 +12,14 @@ from models.domain_models import (
     ClinicianPatientAssignment,
     ClinicalNote,
 )
+from models.community_models import (
+    CommunityCircle,
+    CommunityPost,
+    CommunityReply,
+    CommunityReaction,
+    LocalResource,
+    LocalResourceVote,
+)
 
 __all__ = [
     "User",
@@ -27,4 +35,10 @@ __all__ = [
     "ReminderNotification",
     "ClinicianPatientAssignment",
     "ClinicalNote",
+    "CommunityCircle",
+    "CommunityPost",
+    "CommunityReply",
+    "CommunityReaction",
+    "LocalResource",
+    "LocalResourceVote",
 ]

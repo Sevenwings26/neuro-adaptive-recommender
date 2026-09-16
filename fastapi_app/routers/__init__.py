@@ -9,6 +9,7 @@ from routers.meltdowns_router import meltdowns_router
 from routers.reminders_router import reminders_router
 from routers.clinician_router import clinician_router
 from routers.evidence_router import evidence_router
+from routers.community_router import community_router
 
 api_router = APIRouter()
 
@@ -38,3 +39,7 @@ api_router.include_router(clinician_router)
 
 # Include clinical RAG evidence engine
 api_router.include_router(evidence_router)
+
+# Include in-app caregiver community & local resources
+api_router.include_router(community_router)
+

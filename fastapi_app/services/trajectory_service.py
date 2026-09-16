@@ -16,10 +16,11 @@ def is_flagged(code: str, score: int) -> bool:
 class TrajectoryService:
     @staticmethod
     def get_trajectory(db: Session, child: ChildProfile) -> TrajectoryResponse:
+        # Sort strictly chronologically by completion timestamp
         assessments: List[ScreeningAssessment] = (
             db.query(ScreeningAssessment)
             .filter(ScreeningAssessment.child_id == child.id)
-            .order_by(ScreeningAssessment.completed_at.asc())
+            .order_by(ScreeningAssessment.completed_at.asc(), ScreeningAssessment.id.asc())
             .all()
         )
 
@@ -60,10 +61,16 @@ class TrajectoryService:
                 elif rec.resource_type == "book" and top_book is None:
                     top_book = rec.item_name
 
+            # Chronological age sanity check: anchor to child date_of_birth to prevent age regressions
+            if child.date_of_birth and a.completed_at:
+                calibrated_age = max(1, int(round((a.completed_at.date() - child.date_of_birth).days / 30.4375)))
+            else:
+                calibrated_age = a.age_months
+
             timeline.append(TrajectoryTimelineItem(
                 assessment_id=a.id,
                 completed_at=a.completed_at,
-                age_months=a.age_months,
+                age_months=calibrated_age,
                 risk_probability=a.risk_probability,
                 is_high_risk=a.is_high_risk,
                 total_flags=a.total_flags,
