@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caregiver Village & Community Hub &mdash; NeuroAdapt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --ink:        #0f1923;
+      --ink-soft:   #4a5c6d;
+      --paper:      #f5f8fa;
+      --cream:      #ebf1f5;
+      --card-bg:    #ffffff;
+      --teal:       #0d9488;
+      --teal-lt:    #ccfbf1;
+      --teal-dk:    #115e59;
+      --border:     #d0dbe5;
+      --border-lt:  #e4ecf2;
+      --shadow:     0 4px 20px rgba(15,25,35,0.07);
+      --danger:     #e11d48;
+      --danger-lt:  #ffe4e6;
+      --safe:       #16a34a;
+      --safe-lt:    #dcfce7;
+      --amber:      #d97706;
+      --amber-lt:   #fef3c7;
+      --purple:     #7c3aed;
+      --purple-lt:  #ede9fe;
+      --blue:       #2563eb;
+      --blue-lt:    #dbeafe;
+      --radius:     12px;
+      --mono:       'DM Mono', monospace;
+      --serif:      'Fraunces', Georgia, serif;
+      --sans:       'Outfit', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:       #e0eaf4;
+        --ink-soft:  #8fa4b8;
+        --paper:     #070a0f;
+        --cream:     #0b141f;
+        --card-bg:   #101a26;
+        --teal:      #3ecfc5;
+        --teal-lt:   #092622;
+        --teal-dk:   #5edfd5;
+        --border:    #1d2d3e;
+        --border-lt: #162433;
+        --shadow:    0 8px 32px rgba(0,0,0,0.5);
+        --danger:    #ff7060;
+        --danger-lt: #2a0a0a;
+        --safe:      #50d878;
+        --safe-lt:   #082010;
+        --amber:     #ffa030;
+        --amber-lt:  #251500;
+        --purple:    #a78bfa;
+        --purple-lt: #221538;
+        --blue:      #60a5fa;
+        --blue-lt:   #0f223d;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: #0f1923;
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      margin-left: 2rem;
+      gap: 1.2rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.22);
+      padding: 0.32rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .nav-links a:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: rgba(62,207,197,0.08);
+    }
+    .nav-links a.active {
+      background: rgba(62,207,197,0.18);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 600;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 19px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 101;
+      padding: 0;
+    }
+    .menu-toggle .bar {
+      height: 3px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 960px) {
+      .menu-toggle { display: flex; }
+      .topbar-actions {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #0f1923;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        padding: 1.25rem 2rem;
+        gap: 1rem;
+        margin-left: 0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      }
+      .topbar-actions.open {
+        display: flex;
+        animation: navDrawerFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .nav-links { flex-direction: column; width: 100%; align-items: stretch; }
+      .nav-links a { text-align: center; padding: 0.6rem; }
+    }
+    @keyframes navDrawerFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Main Container ── */
+    .village-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* ── Medical Disclaimer Banner ── */
+    .disclaimer-banner {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--amber);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Hero Banner ── */
+    .village-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .village-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .village-sub {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      max-width: 680px;
+      margin-top: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .btn-create-post {
+      background: linear-gradient(135deg, var(--teal), #0f766e);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(13,148,136,0.3);
+    }
+    .btn-create-post:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(13,148,136,0.4);
+    }
+
+    /* ── Layout Grid ── */
+    .village-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .village-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Sidebar Circles ── */
+    .sidebar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .sidebar-head {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-soft);
+      margin-bottom: 0.85rem;
+    }
+    .circle-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      margin-bottom: 0.3rem;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .circle-item:hover {
+      background: var(--cream);
+      color: var(--teal);
+    }
+    .circle-item.active {
+      background: var(--teal-lt);
+      color: var(--teal);
+      font-weight: 600;
+    }
+    .circle-icon { font-size: 1.1rem; margin-right: 0.6rem; }
+    .circle-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: rgba(0,0,0,0.06);
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .circle-badge { background: rgba(255,255,255,0.08); }
+    }
+
+    /* Persona summary box */
+    .persona-box {
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+    .persona-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--purple-lt);
+      color: var(--purple);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      margin-top: 0.4rem;
+    }
+
+    /* ── Content Feed Area ── */
+    .feed-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+    .view-tabs {
+      display: flex;
+      background: var(--cream);
+      padding: 0.25rem;
+      border-radius: 8px;
+      gap: 0.25rem;
+    }
+    .view-tab {
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .view-tab.active {
+      background: var(--card-bg);
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover, .chip.active {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: var(--teal-lt);
+      font-weight: 600;
+    }
+
+    /* ── Post Card ── */
+    .post-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .post-card:hover {
+      border-color: var(--teal);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(0,0,0,0.09);
+    }
+    .post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--purple));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .author-flair {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+    .author-flair.clinician {
+      background: var(--teal-lt);
+      color: var(--teal);
+      border-color: var(--teal);
+      font-weight: 600;
+    }
+    .post-type-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-question   { background: var(--blue-lt); color: var(--blue); }
+    .tag-experience { background: var(--safe-lt); color: var(--safe); }
+    .tag-concern    { background: var(--amber-lt); color: var(--amber); }
+    .tag-resource_tip { background: var(--purple-lt); color: var(--purple); }
+
+    .post-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+    }
+    .post-snippet {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── Empathy Reactions Bar ── */
+    .reactions-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-lt);
+    }
+    .rxn-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .rxn-btn:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+    .rxn-btn.active {
+      background: var(--teal-lt);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 600;
+    }
+    .replies-count {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* ── Local Directory View ── */
+    .resource-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      gap: 1.2rem;
+      align-items: flex-start;
+    }
+    .res-cat-badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 0.4rem;
+    }
+    .cat-clinic         { background: var(--blue-lt); color: var(--blue); }
+    .cat-sensory_venue  { background: var(--purple-lt); color: var(--purple); }
+    .cat-support_group  { background: var(--safe-lt); color: var(--safe); }
+    .cat-financial_grant{ background: var(--amber-lt); color: var(--amber); }
+    
+    .btn-upvote {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-upvote.voted {
+      background: var(--teal-lt);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    /* ── Modal Window ── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-window {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--ink-soft);
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    .form-textarea { min-height: 120px; resize: vertical; }
+
+    /* ── Clinical Evidence Spotlight Drawer ── */
+    .evidence-spotlight {
+      background: linear-gradient(135deg, rgba(62,207,197,0.08), rgba(124,58,237,0.08));
+      border: 1px solid rgba(62,207,197,0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.25rem 0;
+    }
+    .evidence-spotlight-head {
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--teal);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<nav class="topbar">
+  <a href="/" class="topbar-brand">
+    <span>🤝</span> NeuroAdapt Caregiver Village
+  </a>
+
+  <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Toggle Navigation">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+
+  <div class="topbar-actions" id="topbarActions">
+    <div class="nav-links">
+      <a href="/">Screening</a>
+      <a href="{% if active_child %}/journey/{{ active_child.id }}{% else %}/journey{% endif %}">Journey Loop</a>
+      <a href="{% if active_child %}/schedule/{{ active_child.id }}{% else %}/schedule{% endif %}">Visual Schedules</a>
+      <a href="/community" class="active">🤝 Village</a>
+      {% if user and user.role == 'clinician' %}
+      <a href="/clinician/dashboard">Clinician Caseload</a>
+      {% endif %}
+      <a href="/evidence">Evidence Library</a>
+      <a href="{% if active_child %}/meltdown/{{ active_child.id }}/active{% else %}/meltdown{% endif %}" style="color:#ff7060;">🚨 Meltdown Suite</a>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <span style="font-size:0.8rem;color:#8fa4b8;">{{ user.username }} ({{ user.role }})</span>
+      <button onclick="toggleChat()" style="background:none;border:1px solid var(--teal);color:var(--teal);padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.75rem;font-family:var(--mono);">💬 Ask Nora AI</button>
+      <a href="/logout" style="font-family:var(--mono);font-size:0.75rem;color:#ff7060;text-decoration:none;border:1px solid #ff7060;padding:0.28rem 0.6rem;border-radius:6px;">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Village Shell ── -->
+<main class="village-shell">
+
+  <!-- Medical Disclaimer Banner -->
+  <div class="disclaimer-banner">
+    <span style="font-size:1.2rem;">ℹ️</span>
+    <div>
+      <strong>Caregiver Village Peer Disclaimer:</strong> This community is an educational and peer-to-peer support space for caregivers and specialists. Community shared strategies are lived experiences and do not constitute formal diagnostic or medical advice.
+    </div>
+  </div>
+
+  <!-- Hero Header -->
+  <header class="village-hero">
+    <div>
+      <h1 class="village-title">Caregiver Village & Community Hub</h1>
+      <p class="village-sub">
+        Connect with parents and clinicians navigating similar developmental milestones, share breakthroughs, exchange local sensory opportunities, and access evidence-backed guidance.
+      </p>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <button class="btn-create-post" onclick="openNewPostModal()">
+        <span>✍️</span> Share or Ask with the Village
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <div class="village-grid">
+
+    <!-- Sidebar: Circles & Persona -->
+    <aside class="sidebar-card">
+      <div class="sidebar-head">Developmental Circles</div>
+      
+      <div class="circle-item {% if not selected_circle %}active{% endif %}" onclick="filterCircle('')">
+        <div><span class="circle-icon">🌐</span> All Circles</div>
+        <span class="circle-badge">{{ posts|length }}</span>
+      </div>
+
+      {% for c in circles %}
+      <div class="circle-item {% if selected_circle and selected_circle.slug == c.slug %}active{% endif %}" onclick="filterCircle('{{ c.slug }}')">
+        <div><span class="circle-icon">{{ c.icon }}</span> {{ c.name }}</div>
+        <span class="circle-badge">{{ c.post_count }}</span>
+      </div>
+      {% endfor %}
+
+      <!-- Switch to Local Opportunities Directory -->
+      <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
+        <div class="sidebar-head">Local Exchange</div>
+        <div class="circle-item" id="sidebarLocalTab" onclick="switchMainView('resources')">
+          <div><span class="circle-icon">📍</span> Local Resources & Venues</div>
+          <span class="circle-badge">{{ resources|length }}</span>
+        </div>
+      </div>
+
+      <!-- User's Caregiver Persona Box -->
+      <div class="persona-box">
+        <div class="sidebar-head">Your Village Persona</div>
+        <div style="font-size:0.85rem;font-weight:600;">{{ user.username }}</div>
+        {% if user.role == 'clinician' %}
+          <div class="persona-chip" style="background:var(--teal-lt);color:var(--teal);">🩺 Verified Pediatric Clinician</div>
+        {% elif active_child %}
+          <div class="persona-chip">👶 Parent of {{ active_child.first_name }}</div>
+        {% else %}
+          <div class="persona-chip">🤝 Caregiver Member</div>
+        {% endif %}
+        <p style="font-size:0.74rem;color:var(--ink-soft);margin-top:0.4rem;">
+          🔒 You can toggle <em>"Post Anonymously"</em> on any discussion to safeguard child privacy.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content Feed -->
+    <section>
+      
+      <!-- Feed Header & Controls -->
+      <div class="feed-controls">
+        <div class="view-tabs">
+          <button class="view-tab active" id="tabDiscussions" onclick="switchMainView('discussions')">💬 Discussions & Advice</button>
+          <button class="view-tab" id="tabResources" onclick="switchMainView('resources')">📍 Local Opportunities ({{ resources|length }})</button>
+        </div>
+
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <input type="text" id="villageSearchInput" placeholder="Search questions, tips..." class="form-input" style="width:220px;padding:0.4rem 0.75rem;font-size:0.82rem;" onkeyup="handleSearch(event)">
+          <button onclick="submitSearch()" style="background:var(--cream);border:1px solid var(--border);padding:0.4rem 0.75rem;border-radius:6px;cursor:pointer;font-size:0.82rem;">Search</button>
+        </div>
+      </div>
+
+      <!-- Discussions Container -->
+      <div id="discussionsFeed">
+        <!-- Filter chips for post type -->
+        <div class="filter-chips" style="margin-bottom:1rem;">
+          <button class="chip active" onclick="filterType('all', this)">All Topics</button>
+          <button class="chip" onclick="filterType('question', this)">❓ Questions</button>
+          <button class="chip" onclick="filterType('experience', this)">🎉 Milestone Wins</button>
+          <button class="chip" onclick="filterType('concern', this)">💛 Concerns & Support</button>
+          <button class="chip" onclick="filterType('resource_tip', this)">💡 Tips & Strategies</button>
+        </div>
+
+        <!-- Post Cards List -->
+        <div id="postsList">
+          {% for p in posts %}
+          <article class="post-card" onclick="openPostDetail('{{ p.id }}')">
+            <div class="post-header">
+              <div class="author-info">
+                <div class="author-avatar">{{ p.author_name[0]|upper }}</div>
+                <div>
+                  <span style="font-weight:600;">{{ p.author_name }}</span>
+                  {% if p.author_flair %}
+                    <span class="author-flair {% if 'Clinician' in p.author_flair %}clinician{% endif %}">{{ p.author_flair }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span class="post-type-tag tag-{{ p.post_type }}">{{ p.post_type }}</span>
+                <span>{{ p.circle_icon }} {{ p.circle_name }}</span>
+              </div>
+            </div>
+
+            <h2 class="post-title">{{ p.title }}</h2>
+            <p class="post-snippet">{{ p.body }}</p>
+
+            <div class="reactions-bar" onclick="event.stopPropagation()">
+              <button class="rxn-btn {% if 'support' in p.user_reactions %}active{% endif %}" onclick="react('post', '{{ p.id }}', 'support', this)">
+                💙 Support (<span>{{ p.reactions_count.support }}</span>)
+              </button>
+              <button class="rxn-btn {% if 'relate' in p.user_reactions %}active{% endif %}" onclick="react('post', '{{ p.id }}', 'relate', this)">
+                🤝 Relate (<span>{{ p.reactions_count.relate }}</span>)
+              </button>
+              <button class="rxn-btn {% if 'helpful' in p.user_reactions %}active{% endif %}" onclick="react('post', '{{ p.id }}', 'helpful', this)">
+                💡 Helpful (<span>{{ p.reactions_count.helpful }}</span>)
+              </button>
+              <button class="rxn-btn {% if 'celebrate' in p.user_reactions %}active{% endif %}" onclick="react('post', '{{ p.id }}', 'celebrate', this)">
+                🎉 Celebrate (<span>{{ p.reactions_count.celebrate }}</span>)
+              </button>
+
+              <div class="replies-count">
+                💬 {{ p.replies_count }} replies
+              </div>
+            </div>
+          </article>
+          {% else %}
+          <div style="padding:3rem;text-align:center;color:var(--ink-soft);background:var(--card-bg);border:1px solid var(--border);border-radius:12px;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🤝</div>
+            <h3>No conversations in this circle yet</h3>
+            <p style="font-size:0.88rem;margin-top:0.3rem;">Be the first caregiver to ask a question or share an experience!</p>
+            <button class="btn-create-post" style="margin:1.2rem auto 0 auto;" onclick="openNewPostModal()">Start a Discussion</button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Local Resources Container (Hidden by default) -->
+      <div id="resourcesFeed" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div style="font-size:0.9rem;color:var(--ink-soft);">Discover sensory-friendly venues, adaptive clinics, and parent meetups.</div>
+          <button class="btn-create-post" style="padding:0.5rem 1rem;font-size:0.82rem;" onclick="openNewResourceModal()">+ Add Local Opportunity</button>
+        </div>
+
+        <div id="resourcesList">
+          {% for r in resources %}
+          <div class="resource-card">
+            <div style="flex:1;">
+              <span class="res-cat-badge cat-{{ r.category }}">{{ r.category|replace('_', ' ') }}</span>
+              <h3 style="font-size:1.15rem;font-weight:600;margin-bottom:0.3rem;">{{ r.name }}</h3>
+              <div style="font-size:0.82rem;color:var(--teal);font-weight:600;margin-bottom:0.5rem;">
+                📍 {{ r.city }}, {{ r.state }} {% if r.address_or_url %}&bull; {{ r.address_or_url }}{% endif %}
+              </div>
+              <p style="font-size:0.88rem;color:var(--ink-soft);line-height:1.45;margin-bottom:0.6rem;">{{ r.description }}</p>
+              <div style="font-size:0.75rem;color:var(--ink-soft);">
+                {% if r.contact_info %}📞 {{ r.contact_info }} &bull; {% endif %} Shared by {{ r.submitted_by_name }}
+              </div>
+            </div>
+
+            <button class="btn-upvote {% if r.user_has_upvoted %}voted{% endif %}" onclick="upvoteResource('{{ r.id }}', this)">
+              <span style="font-size:1.1rem;">▲</span>
+              <span style="font-size:0.8rem;font-weight:700;" class="vote-count">{{ r.upvotes_count }}</span>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<!-- ── New Discussion Modal ── -->
+<div class="modal-backdrop" id="modalNewPost">
+  <div class="modal-window">
+    <button class="modal-close" onclick="closeModal('modalNewPost')">&times;</button>
+    <h2 style="font-family:var(--serif);font-size:1.5rem;margin-bottom:0.4rem;">Share with the Village</h2>
+    <p style="color:var(--ink-soft);font-size:0.85rem;margin-bottom:1.5rem;">
+      Ask a developmental question, share a therapeutic breakthrough, or connect over shared challenges.
+    </p>
+
+    <form id="formNewPost" onsubmit="submitNewPost(event)">
+      <div class="form-group">
+        <label class="form-label">Select Developmental Circle</label>
+        <select id="postCircleSelect" class="form-select" required>
+          {% for c in circles %}
+          <option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Post Type</label>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.85rem;cursor:pointer;">
+            <input type="radio" name="postType" value="question" checked> ❓ Question / Advice
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.85rem;cursor:pointer;">
+            <input type="radio" name="postType" value="experience"> 🎉 Milestone Win
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.85rem;cursor:pointer;">
+            <input type="radio" name="postType" value="concern"> 💛 Concern & Vent
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.85rem;cursor:pointer;">
+            <input type="radio" name="postType" value="resource_tip"> 💡 Strategy Tip
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Discussion Title</label>
+        <input type="text" id="postTitle" class="form-input" placeholder="e.g. Tips for introducing AAC device during sensory transitions?" required minlength="5">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Your Concern / Experience</label>
+        <textarea id="postBody" class="form-textarea" placeholder="Describe what you are observing or seeking guidance on..." required minlength="10"></textarea>
+      </div>
+
+      <div class="form-group" style="background:var(--cream);padding:0.75rem;border-radius:8px;border:1px solid var(--border);">
+        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="postIsAnonymous" onchange="toggleAnonymousPreview(this.checked)">
+          <span>Post as Anonymous Caregiver</span>
+        </label>
+        <div id="anonymousPreviewNote" style="font-size:0.75rem;color:var(--ink-soft);margin-top:0.3rem;">
+          Your username will be masked as <em>"Anonymous Caregiver"</em> while keeping your child's age tag for developmental context.
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+        <button type="button" onclick="closeModal('modalNewPost')" style="background:none;border:1px solid var(--border);padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;">Cancel</button>
+        <button type="submit" class="btn-create-post" style="padding:0.6rem 1.4rem;">Publish Discussion</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Post Detail & Replies Modal ── -->
+<div class="modal-backdrop" id="modalPostDetail">
+  <div class="modal-window" style="max-width:760px;">
+    <button class="modal-close" onclick="closeModal('modalPostDetail')">&times;</button>
+    <div id="postDetailContent">
+      <!-- Injected dynamically by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ── Submit Local Opportunity Modal ── -->
+<div class="modal-backdrop" id="modalNewResource">
+  <div class="modal-window">
+    <button class="modal-close" onclick="closeModal('modalNewResource')">&times;</button>
+    <h2 style="font-family:var(--serif);font-size:1.5rem;margin-bottom:0.4rem;">Share a Local Opportunity</h2>
+    <p style="color:var(--ink-soft);font-size:0.85rem;margin-bottom:1.5rem;">Help other caregivers discover inclusive venues, adaptive clinics, or sensory-friendly spaces.</p>
+
+    <form id="formNewResource" onsubmit="submitNewResource(event)">
+      <div class="form-group">
+        <label class="form-label">Resource or Venue Name</label>
+        <input type="text" id="resName" class="form-input" placeholder="e.g. Austin Sensory Gym & Swings" required minlength="3">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select id="resCategory" class="form-select" required>
+          <option value="sensory_venue">🎪 Sensory-Friendly Venue / Playground</option>
+          <option value="clinic">🏥 Pediatric Clinic (SLP / OT / PT)</option>
+          <option value="support_group">🤝 Caregiver Support Circle / Meetup</option>
+          <option value="education">🏫 Inclusive Pre-K & Childcare</option>
+          <option value="financial_grant">📋 Grants, State Aid & Early Intervention</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input type="text" id="resCity" class="form-input" placeholder="Austin" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">State</label>
+          <input type="text" id="resState" class="form-input" placeholder="TX" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Address or Website URL</label>
+        <input type="text" id="resAddress" class="form-input" placeholder="https://... or 123 Main St">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Contact Phone or Email</label>
+        <input type="text" id="resContact" class="form-input" placeholder="(512) ... or info@...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Caregiver Review & Sensory Tips</label>
+        <textarea id="resDesc" class="form-textarea" placeholder="Why do you recommend this space? (e.g. Quiet sensory room available, staff trained in AAC...)" required minlength="10"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+        <button type="button" onclick="closeModal('modalNewResource')" style="background:none;border:1px solid var(--border);padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;">Cancel</button>
+        <button type="submit" class="btn-create-post" style="padding:0.6rem 1.4rem;">Submit Opportunity</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% include "_chat.html" %}
+{% include "_chat_assets.html" %}
+
+<script>
+  let currentCircleSlug = '{{ selected_circle.slug if selected_circle else "" }}';
+  let currentPostType = 'all';
+  let activePostId = null;
+
+  function toggleMenu() {
+    const actions = document.getElementById('topbarActions');
+    const toggle = document.getElementById('menuToggle');
+    if (actions && toggle) {
+      actions.classList.toggle('open');
+      toggle.classList.toggle('open');
+    }
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function openNewPostModal() { openModal('modalNewPost'); }
+  function openNewResourceModal() { openModal('modalNewResource'); }
+
+  function switchMainView(view) {
+    const tabDisc = document.getElementById('tabDiscussions');
+    const tabRes = document.getElementById('tabResources');
+    const feedDisc = document.getElementById('discussionsFeed');
+    const feedRes = document.getElementById('resourcesFeed');
+
+    if (view === 'discussions') {
+      tabDisc.classList.add('active');
+      tabRes.classList.remove('active');
+      feedDisc.style.display = 'block';
+      feedRes.style.display = 'none';
+    } else {
+      tabRes.classList.add('active');
+      tabDisc.classList.remove('active');
+      feedDisc.style.display = 'none';
+      feedRes.style.display = 'block';
+    }
+  }
+
+  function filterCircle(slug) {
+    currentCircleSlug = slug;
+    loadPosts();
+  }
+
+  function filterType(type, btn) {
+    currentPostType = type;
+    document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    loadPosts();
+  }
+
+  function handleSearch(e) {
+    if (e.key === 'Enter') submitSearch();
+  }
+
+  function submitSearch() {
+    loadPosts();
+  }
+
+  async function loadPosts() {
+    const q = document.getElementById('villageSearchInput').value.trim();
+    let url = `/api/v1/community/posts?limit=50`;
+    if (currentCircleSlug) url += `&circle_slug=${encodeURIComponent(currentCircleSlug)}`;
+    if (currentPostType && currentPostType !== 'all') url += `&post_type=${encodeURIComponent(currentPostType)}`;
+    if (q) url += `&q=${encodeURIComponent(q)}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to load posts');
+      const posts = await res.json();
+      renderPosts(posts);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function renderPosts(posts) {
+    const list = document.getElementById('postsList');
+    if (!posts || posts.length === 0) {
+      list.innerHTML = `
+        <div style="padding:3rem;text-align:center;color:var(--ink-soft);background:var(--card-bg);border:1px solid var(--border);border-radius:12px;">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;">🤝</div>
+          <h3>No conversations match your filter</h3>
+          <p style="font-size:0.88rem;margin-top:0.3rem;">Be the first caregiver to ask a question or share an experience!</p>
+          <button class="btn-create-post" style="margin:1.2rem auto 0 auto;" onclick="openNewPostModal()">Start a Discussion</button>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = posts.map(p => `
+      <article class="post-card" onclick="openPostDetail('${p.id}')">
+        <div class="post-header">
+          <div class="author-info">
+            <div class="author-avatar">${(p.author_name || 'A')[0].toUpperCase()}</div>
+            <div>
+              <span style="font-weight:600;">${p.author_name}</span>
+              ${p.author_flair ? `<span class="author-flair ${p.author_flair.includes('Clinician') ? 'clinician' : ''}">${p.author_flair}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span class="post-type-tag tag-${p.post_type}">${p.post_type}</span>
+            <span>${p.circle_icon} ${p.circle_name}</span>
+          </div>
+        </div>
+
+        <h2 class="post-title">${p.title}</h2>
+        <p class="post-snippet">${p.body}</p>
+
+        <div class="reactions-bar" onclick="event.stopPropagation()">
+          <button class="rxn-btn ${p.user_reactions.includes('support') ? 'active' : ''}" onclick="react('post', '${p.id}', 'support', this)">
+            💙 Support (<span>${p.reactions_count.support || 0}</span>)
+          </button>
+          <button class="rxn-btn ${p.user_reactions.includes('relate') ? 'active' : ''}" onclick="react('post', '${p.id}', 'relate', this)">
+            🤝 Relate (<span>${p.reactions_count.relate || 0}</span>)
+          </button>
+          <button class="rxn-btn ${p.user_reactions.includes('helpful') ? 'active' : ''}" onclick="react('post', '${p.id}', 'helpful', this)">
+            💡 Helpful (<span>${p.reactions_count.helpful || 0}</span>)
+          </button>
+          <button class="rxn-btn ${p.user_reactions.includes('celebrate') ? 'active' : ''}" onclick="react('post', '${p.id}', 'celebrate', this)">
+            🎉 Celebrate (<span>${p.reactions_count.celebrate || 0}</span>)
+          </button>
+
+          <div class="replies-count">
+            💬 ${p.replies_count} replies
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  async function react(targetType, targetId, reactionType, btn) {
+    try {
+      const url = targetType === 'post' 
+        ? `/api/v1/community/posts/${targetId}/react` 
+        : `/api/v1/community/replies/${targetId}/react`;
+      
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reaction_type: reactionType })
+      });
+      if (!res.ok) throw new Error('Reaction failed');
+      const data = await res.json();
+      
+      // Update UI counts
+      btn.querySelector('span').innerText = data.reactions_count[reactionType] || 0;
+      if (data.user_reactions.includes(reactionType)) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function openPostDetail(postId) {
+    activePostId = postId;
+    try {
+      const res = await fetch(`/api/v1/community/posts/${postId}`);
+      if (!res.ok) throw new Error('Failed to load post details');
+      const p = await res.json();
+      
+      let evidenceHtml = '';
+      if (p.evidence_spotlight && p.evidence_spotlight.length > 0) {
+        evidenceHtml = `
+          <div class="evidence-spotlight">
+            <div class="evidence-spotlight-head">
+              <span>🩺 Clinical Evidence Spotlight</span>
+            </div>
+            ${p.evidence_spotlight.map(e => `
+              <div style="font-size:0.84rem;margin-bottom:0.4rem;">
+                <strong>${e.title}</strong> (${e.intervention}) &bull; <span style="color:var(--teal);">${e.tier}</span>
+                <div style="font-size:0.78rem;color:var(--ink-soft);">${e.key_outcome}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      let repliesHtml = p.replies.map(r => `
+        <div style="padding:1rem 0;border-bottom:1px solid var(--border-lt);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span style="font-weight:600;font-size:0.85rem;">${r.author_name}</span>
+              ${r.author_flair ? `<span class="author-flair ${r.author_flair.includes('Clinician') ? 'clinician' : ''}">${r.author_flair}</span>` : ''}
+              ${r.is_clinician_endorsed ? `<span style="background:var(--amber-lt);color:var(--amber);font-size:0.72rem;font-weight:700;padding:0.15rem 0.45rem;border-radius:4px;">⭐ Clinician Endorsed</span>` : ''}
+            </div>
+            {% if user and user.role == 'clinician' %}
+            <button onclick="endorseReply('${r.id}')" style="font-size:0.72rem;background:none;border:1px solid var(--amber);color:var(--amber);padding:0.15rem 0.45rem;border-radius:4px;cursor:pointer;">
+              ${r.is_clinician_endorsed ? 'Remove Endorsement' : 'Endorse Advice'}
+            </button>
+            {% endif %}
+          </div>
+          <p style="font-size:0.88rem;line-height:1.45;color:var(--ink);">${r.body}</p>
+        </div>
+      `).join('');
+
+      if (!repliesHtml) {
+        repliesHtml = '<div style="padding:1.5rem;text-align:center;color:var(--ink-soft);font-size:0.85rem;">No replies yet. Share your experience or advice below!</div>';
+      }
+
+      document.getElementById('postDetailContent').innerHTML = `
+        <div class="post-header" style="margin-bottom:1rem;">
+          <div class="author-info">
+            <div class="author-avatar">${(p.author_name || 'A')[0].toUpperCase()}</div>
+            <div>
+              <div style="font-weight:600;">${p.author_name}</div>
+              <div style="font-size:0.75rem;color:var(--ink-soft);">${p.author_flair || ''}</div>
+            </div>
+          </div>
+          <span class="post-type-tag tag-${p.post_type}">${p.post_type}</span>
+        </div>
+
+        <h2 style="font-size:1.35rem;font-weight:600;margin-bottom:0.75rem;">${p.title}</h2>
+        <div style="font-size:0.95rem;line-height:1.6;color:var(--ink);margin-bottom:1rem;">${p.body}</div>
+
+        ${evidenceHtml}
+
+        <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 0.5rem 0;display:flex;align-items:center;gap:0.4rem;">
+          💬 Community Replies (${p.replies.length})
+        </h3>
+        <div style="max-height:300px;overflow-y:auto;margin-bottom:1.5rem;">
+          ${repliesHtml}
+        </div>
+
+        <!-- Quick Reply Form -->
+        <form onsubmit="submitReply(event)">
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <textarea id="replyBody" class="form-textarea" style="min-height:80px;" placeholder="Write a supportive, lived-experience reply..." required></textarea>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:var(--ink-soft);cursor:pointer;">
+              <input type="checkbox" id="replyIsAnonymous"> Post as Anonymous Caregiver
+            </label>
+            <button type="submit" class="btn-create-post" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Post Reply</button>
+          </div>
+        </form>
+      `;
+
+      openModal('modalPostDetail');
+    } catch (err) {
+      console.error(err);
+      alert('Could not load discussion details.');
+    }
+  }
+
+  async function submitReply(e) {
+    e.preventDefault();
+    const body = document.getElementById('replyBody').value.trim();
+    const isAnonymous = document.getElementById('replyIsAnonymous').checked;
+    if (!body || !activePostId) return;
+
+    try {
+      const res = await fetch(`/api/v1/community/posts/${activePostId}/replies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: body, is_anonymous: isAnonymous })
+      });
+      if (!res.ok) throw new Error('Failed to post reply');
+      // Refresh modal
+      openPostDetail(activePostId);
+      loadPosts();
+    } catch (err) {
+      console.error(err);
+      alert('Could not submit reply.');
+    }
+  }
+
+  async function endorseReply(replyId) {
+    try {
+      const res = await fetch(`/api/v1/community/replies/${replyId}/endorse`, { method: 'POST' });
+      if (!res.ok) throw new Error('Endorsement failed');
+      openPostDetail(activePostId);
+    } catch (err) {
+      console.error(err);
+      alert('Endorsement failed. Clinician role required.');
+    }
+  }
+
+  async function submitNewPost(e) {
+    e.preventDefault();
+    const circleId = document.getElementById('postCircleSelect').value;
+    const postType = document.querySelector('input[name="postType"]:checked').value;
+    const title = document.getElementById('postTitle').value.trim();
+    const body = document.getElementById('postBody').value.trim();
+    const isAnonymous = document.getElementById('postIsAnonymous').checked;
+
+    try {
+      const res = await fetch('/api/v1/community/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          circle_id: circleId,
+          post_type: postType,
+          title: title,
+          body: body,
+          is_anonymous: isAnonymous
+        })
+      });
+      if (!res.ok) throw new Error('Failed to create post');
+      closeModal('modalNewPost');
+      document.getElementById('formNewPost').reset();
+      loadPosts();
+    } catch (err) {
+      console.error(err);
+      alert('Could not publish discussion.');
+    }
+  }
+
+  async function submitNewResource(e) {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById('resName').value.trim(),
+      category: document.getElementById('resCategory').value,
+      city: document.getElementById('resCity').value.trim(),
+      state: document.getElementById('resState').value.trim(),
+      address_or_url: document.getElementById('resAddress').value.trim(),
+      contact_info: document.getElementById('resContact').value.trim(),
+      description: document.getElementById('resDesc').value.trim()
+    };
+
+    try {
+      const res = await fetch('/api/v1/community/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Failed to submit resource');
+      closeModal('modalNewResource');
+      document.getElementById('formNewResource').reset();
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert('Could not submit resource.');
+    }
+  }
+
+  async function upvoteResource(resId, btn) {
+    try {
+      const res = await fetch(`/api/v1/community/resources/${resId}/upvote`, { method: 'POST' });
+      if (!res.ok) throw new Error('Upvote failed');
+      const data = await res.json();
+      btn.querySelector('.vote-count').innerText = data.upvotes_count;
+      if (data.user_has_upvoted) {
+        btn.classList.add('voted');
+      } else {
+        btn.classList.remove('voted');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function toggleAnonymousPreview(isAnon) {
+    const note = document.getElementById('anonymousPreviewNote');
+    if (note) {
+      note.innerHTML = isAnon 
+        ? '🔒 <strong>Anonymous mode active:</strong> Your real username is hidden. Fellow parents see you as <em>"Anonymous Caregiver • Parent of {{ active_child.first_name if active_child else 'Toddler' }}"</em>.'
+        : 'Your username (<strong>{{ user.username }}</strong>) will be visible beside your post.';
+    }
+  }
+</script>
+</body>
+</html>

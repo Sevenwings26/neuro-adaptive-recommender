@@ -10,7 +10,7 @@ from schemas.recommend import (
 from core import (
     state, predict_risk, recommend_apps, recommend_books,
     map_likert_standard, map_likert_reverse,
-    build_profile_text, QUESTION_LABELS, CHAT_SYSTEM_PROMPT, GEMINI_MODEL, log
+    build_profile_text, QUESTION_LABELS, CHAT_SYSTEM_PROMPT, GENERAL_CHAT_SYSTEM_PROMPT, GEMINI_MODEL, log
 )
 from services.auth_service import get_current_user, RoleChecker
 from models.auth_models import User
@@ -141,25 +141,34 @@ def chat(
     t0  = time.time()
     ctx = request.screening_context
 
-    system_prompt = CHAT_SYSTEM_PROMPT.format(
-        age               = ctx.age,
-        sex_label         = ctx.sex_label,
-        risk_probability  = ctx.risk_probability,
-        total_flags       = ctx.total_flags,
-        flagged_questions = ", ".join(ctx.flagged_questions) or "none",
-        profile_text      = ctx.profile_text or "general autism support",
-        recommended_apps  = ", ".join(ctx.recommended_apps) or "none yet",
-        recommended_books = ", ".join(ctx.recommended_books) or "none yet",
-    )
+    is_screened = getattr(ctx, "screened", False) and (ctx.age > 0 or ctx.total_flags > 0 or ctx.risk_probability > 0)
+    if is_screened:
+        system_prompt = CHAT_SYSTEM_PROMPT.format(
+            age               = ctx.age,
+            sex_label         = ctx.sex_label,
+            risk_probability  = ctx.risk_probability,
+            total_flags       = ctx.total_flags,
+            flagged_questions = ", ".join(ctx.flagged_questions) or "none",
+            profile_text      = ctx.profile_text or "general autism support",
+            recommended_apps  = ", ".join(ctx.recommended_apps) or "none yet",
+            recommended_books = ", ".join(ctx.recommended_books) if hasattr(ctx, 'recommended_books') and ctx.recommended_books else "none yet",
+        )
+        assistant_ack = (
+            "Understood. I'm here to help you understand your child's screening "
+            "results and early intervention options. What would you like to know?"
+        )
+    else:
+        system_prompt = GENERAL_CHAT_SYSTEM_PROMPT
+        assistant_ack = (
+            "Hello, I'm Nora. I'm here to share general information about child development, "
+            "milestones, and early autism traits. How can I help you today?"
+        )
 
     history_turns = request.history[-20:]
     messages = (
         [
             {"role": "user",  "parts": [{"text": system_prompt}]},
-            {"role": "model", "parts": [{"text": (
-                "Understood. I'm here to help you understand your child's screening "
-                "results and early intervention options. What would you like to know?"
-            )}]},
+            {"role": "model", "parts": [{"text": assistant_ack}]},
         ]
         + [
             {"role": m.role if m.role == "model" else "user",

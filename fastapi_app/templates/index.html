@@ -527,6 +527,7 @@
     <a href="/" style="font-family:var(--mono);font-size:0.74rem;color:#5ecfc5;border:1px solid #5ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;background:rgba(94,207,197,0.12);">Screening</a>
     <a href="{% if active_child %}/journey/{{ active_child.id }}{% else %}/journey{% endif %}" id="navJourneyLink" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Journey Loop</a>
     <a href="{% if active_child %}/schedule/{{ active_child.id }}{% else %}/schedule{% endif %}" id="navScheduleLink" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Visual Schedules</a>
+    <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
     {% if user and user.role == 'clinician' %}
     <a href="/clinician/dashboard" style="font-family:var(--mono);font-size:0.74rem;color:#3ecfc5;border:1px solid #3ecfc5;padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">Clinician Caseload</a>
     {% endif %}
@@ -711,11 +712,17 @@
 
   // ── Top-N picker ──────────────────────────────────────────────────
   function setTopN(n) {
-    document.getElementById('topNVal').value = n;
+    const input = document.getElementById('topNVal');
+    if (input) input.value = n;
     document.querySelectorAll('.topn-btn').forEach(b => {
-      b.classList.toggle('active', parseInt(b.textContent) === n);
+      b.classList.toggle('active', parseInt(b.textContent.trim()) === n);
     });
   }
+
+  // Ensure top-n defaults to 3 on load
+  document.addEventListener('DOMContentLoaded', () => {
+    setTopN(3);
+  });
 
   // ── Progress bar (counts how many select inputs have been changed) ──
   let touched = new Set();
@@ -848,6 +855,12 @@ async function submitNewChild() {
   const sex = parseInt(document.getElementById('modalChildSex').value, 10);
   if (!name || !dob) {
     alert("Please enter the child's name and date of birth.");
+    return;
+  }
+  const dobDate = new Date(dob);
+  const diffMonths = Math.round((new Date() - dobDate) / (1000 * 60 * 60 * 24 * 30.44));
+  if (diffMonths < 12 || diffMonths > 48) {
+    alert(`NeuroAdapt early screening is calibrated specifically for toddlers aged 12 to 48 months (1 to 4 years old).\n\nThe selected birth date corresponds to approximately ${diffMonths} months.`);
     return;
   }
   try {

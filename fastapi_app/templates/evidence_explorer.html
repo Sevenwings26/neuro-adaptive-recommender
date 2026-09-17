@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clinical Evidence Library ? NeuroAdapt</title>
+  <title>Clinical Evidence Library &mdash; NeuroAdapt</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -64,7 +64,7 @@
       flex-direction: column;
     }
 
-    /* ?? Top Bar ?? */
+    /* ── Top Bar ── */
     .topbar {
       background: #0b141f;
       color: #fff;
@@ -214,7 +214,7 @@
       border: 1px solid rgba(255,255,255,0.12);
     }
 
-    /* ?? Container ?? */
+    /* ── Container ── */
     .container {
       max-width: 1240px;
       margin: 2rem auto;
@@ -241,7 +241,7 @@
       line-height: 1.5;
     }
 
-    /* ?? Search & Filter Toolbar ?? */
+    /* ── Search & Filter Toolbar ── */
     .toolbar-card {
       background: var(--card-bg);
       border: 1px solid var(--border-lt);
@@ -335,7 +335,7 @@
     }
     .chip:hover { background: var(--teal-lt); color: var(--teal); }
 
-    /* ?? Evidence Cards Grid ?? */
+    /* ── Evidence Cards Grid ── */
     .evidence-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -461,6 +461,7 @@
         <a href="/clinician/dashboard" class="nav-link">Caseload Roster</a>
         {% endif %}
         <a href="/evidence" class="nav-link active">Evidence Library</a>
+    <a href="/community" style="font-family:var(--mono);font-size:0.74rem;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:0.3rem 0.75rem;border-radius:6px;text-decoration:none;">🤝 Village</a>
         <a href="/" class="nav-link">Screening View</a>
         <a href="/logout" class="nav-link">Sign Out</a>
       </nav>
@@ -484,7 +485,7 @@
     <div class="toolbar-card">
       <div class="search-row">
         <div class="search-input-wrap">
-          <span>??</span>
+          <span>🔍</span>
           <input type="text" id="evidenceQuery" placeholder="Search by trial name, intervention, sample size, or clinical outcome..." onkeydown="if(event.key==='Enter') doSearch()" />
         </div>
         <button class="btn-search" onclick="doSearch()">Search Engine</button>
