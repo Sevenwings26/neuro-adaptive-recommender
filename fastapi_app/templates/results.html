@@ -576,7 +576,7 @@
         <div class="rec-rank">#{{ rec.rank }}</div>
         <div>
           <div class="rec-name">
-            <a href="{{ rec.app_url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;">
+            <a href="{{ rec.app_url or rec.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;">
               {{ rec.app_name }} <span style="font-size:0.75rem;opacity:0.8;">↗</span>
             </a>
           </div>
@@ -711,7 +711,7 @@
   </div>
 
   <p style="margin-top:1.5rem;font-size:0.75rem;color:var(--ink-soft);text-align:center;">
-    Developed by <strong>Taiye Janet Fagbolade | Iyanu Arowosola</strong> ·
+    Architected and Developed by <strong>Taiye Janet Fagbolade | FastAPI Support by Iyanu Arowosola</strong> ·
   </p>
 </div>
 

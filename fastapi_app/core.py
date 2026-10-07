@@ -59,7 +59,7 @@ EVIDENCE_KEYWORDS = [
     "backed by research", "clinical trial", "published study"
 ]
 
-GEMINI_MODEL = "models/gemini-2.5-flash"
+GEMINI_MODEL = "models/gemini-3.5-flash"
 
 CHAT_SYSTEM_PROMPT = """\
 You are a warm, knowledgeable special education consultant named Nora.
@@ -465,7 +465,7 @@ def recommend_apps(profile_text: str, top_n: int = 3) -> list[RecommendedApp]:
     results = []
     for i, row in top.iterrows():
         app_name = clean_nan(row.get("App_Name")) or ""
-        link = clean_nan(row.get("App_Link")) or clean_nan(row.get("app_url"))
+        link = clean_nan(row.get("App_Link")) or clean_nan(row.get("app_url")) or clean_nan(row.get("url"))
         if not link:
             link = f"https://play.google.com/store/search?q={urllib.parse.quote(app_name)}&c=apps"
 
@@ -479,6 +479,7 @@ def recommend_apps(profile_text: str, top_n: int = 3) -> list[RecommendedApp]:
                 description=str(clean_nan(row.get("Description")) or "")[:200],
                 match_score=float(row["match_score"]),
                 app_url=str(link),
+                url=str(link),
             )
         )
     return results
